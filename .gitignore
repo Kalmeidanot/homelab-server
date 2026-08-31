@@ -1,0 +1,11 @@
+# Secrets
+.env
+.env.*
+*.key
+*.pem
+secrets/
+credentials/
+
+# Temporary files
+*.tmp
+*.log
