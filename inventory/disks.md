@@ -1,6 +1,6 @@
 # Disk Inventory
 
-Recorded: 2026-08-31
+Recorded: 2026-09-02
 
 ## Internal system SSD
 
@@ -25,7 +25,7 @@ WD My Book 12 TB.
 
 Status:
 
-Not connected.
-Not partitioned by this project.
-Not mounted.
-Not yet configured.
+- Initial SMART short and extended tests completed successfully.
+- Configured with an ext4 filesystem labeled STORAGE.
+- Mounted read/write at /srv/storage.
+- Used for bulk storage, including /srv/storage/media.
