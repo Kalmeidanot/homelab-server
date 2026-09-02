@@ -31,13 +31,11 @@ Verify the new 12 TB WD My Book before storing data on it or changing its factor
 
 ## Temperature
 
-The drive warmed significantly during the extended full-surface test.
-
 - Initial temperature: approximately 23-27 C
-- Maximum observed temperature: 54 C
-- Temperature during later testing: approximately 51-52 C
-- Temperature guard threshold: 55 C
-- Temperature guard was never triggered
+- Maximum observed during extended test: 54 C
+- Automatic safety threshold: 55 C
+- Safety threshold was never reached
+- Extended self-test completed normally without intervention
 
 Physical spacing around the drive was increased during testing.
 
@@ -47,10 +45,10 @@ Successful.
 
 The drive passed the initial health and extended SMART burn-in tests without errors.
 
-The drive is approved to proceed to storage configuration.
+The drive is approved for NAS storage configuration.
 
 ## Notes
 
-Temperature should continue to be monitored after normal workloads are established.
+Temperature should continue to be monitored under normal NAS workloads.
 
-The My Book should remain upright with adequate ventilation around the enclosure.
+The My Book should remain upright with adequate ventilation.
