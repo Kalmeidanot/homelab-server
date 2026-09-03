@@ -35,6 +35,20 @@ Provide local media playback for movies and TV series stored on the My Book.
 - Playback succeeded in a browser.
 - Playback succeeded on the TV.
 
+### Reboot and autostart
+
+Follow-up validation completed on 2026-09-03:
+
+- The server reboot completed successfully and remote SSH access returned.
+- Cockpit became available automatically after boot.
+- Docker and containerd started automatically.
+- The Jellyfin container started automatically through its `unless-stopped`
+  restart policy.
+- The Jellyfin web interface became available at http://10.0.0.6:8096 without
+  manual container startup.
+- /srv/storage remained available after the reboot.
+- Existing server services remained operational.
+
 ### Intel hardware acceleration
 
 Follow-up validation completed on 2026-09-03:
@@ -70,10 +84,12 @@ encoding path or tone-mapping scenario.
 
 ## Outcome
 
-Successful deployment and playback validation. Intel hardware-accelerated
-transcoding is formally verified for a real H.264 QSV transcode. Metadata scanning
-remains in progress; other codec and tone-mapping scenarios have not been
-individually validated.
+Successful deployment, playback validation and post-deployment reboot/autostart
+validation. Jellyfin returned without manual container startup, storage remained
+available and existing server services remained operational. Intel
+hardware-accelerated transcoding is formally verified for a real H.264 QSV
+transcode. Metadata scanning remains in progress; other codec and tone-mapping
+scenarios have not been individually validated.
 
 ## Rollback / Recovery
 

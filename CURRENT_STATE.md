@@ -41,6 +41,9 @@ Currently installed/configured:
 - Docker and containerd services are active
 - Jellyfin deployed through Docker Compose with host networking
 - Codex CLI and bubblewrap administration tooling
+- Post-deployment reboot validation completed successfully: remote SSH access returned,
+  Cockpit and Docker/containerd started automatically, /srv/storage remained available,
+  and existing server services remained operational
 
 Not yet installed:
 
@@ -72,6 +75,8 @@ Not yet installed:
 - Movies library: /media/movies
 - TV library: /media/tv-series
 - Initial setup and browser/TV playback testing completed successfully
+- Reboot/autostart validation completed successfully: the container started through
+  its restart policy and the web interface became available without manual startup
 - Initial metadata/library scan is still being allowed to finish
 - Hardware acceleration: Intel Quick Sync (QSV) using Intel UHD Graphics 770
 - Intel iHD VA-API driver and /dev/dri/renderD128 access validated inside the container
