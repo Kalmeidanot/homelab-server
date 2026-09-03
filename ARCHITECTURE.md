@@ -51,8 +51,11 @@ jellyfin/jellyfin:latest image. Persistent configuration and cache data live on
 the internal SSD under /srv/jellyfin. Bulk media remains on the external disk.
 
 The container receives /dev/dri/renderD128 and supplemental group GID 991 for
-planned Intel graphics acceleration. This device access is configured, but
-hardware-accelerated transcoding has not yet been formally validated.
+Intel graphics acceleration. Jellyfin is configured to use Intel Quick Sync
+(QSV). The Intel iHD driver, VA-API device access and a real H.264 QSV playback
+transcode have been successfully validated. This confirms the hardware path for
+that tested scenario; it does not establish that every codec or tone-mapping
+scenario has been tested.
 
 ## Administration
 

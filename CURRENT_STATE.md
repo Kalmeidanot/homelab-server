@@ -1,6 +1,6 @@
 # Current State
 
-Last updated: 2026-09-02
+Last updated: 2026-09-03
 
 ## Host
 
@@ -73,4 +73,9 @@ Not yet installed:
 - TV library: /media/tv-series
 - Initial setup and browser/TV playback testing completed successfully
 - Initial metadata/library scan is still being allowed to finish
-- Hardware-accelerated transcoding has not yet been formally validated
+- Hardware acceleration: Intel Quick Sync (QSV) using Intel UHD Graphics 770
+- Intel iHD VA-API driver and /dev/dri/renderD128 access validated inside the container
+- A real H.264 QSV transcode was successfully validated through forced playback
+  transcoding; the Jellyfin FFmpeg log confirmed VA-API initialization, QSV device
+  derivation and use of the h264_qsv encoder
+- Other codec and tone-mapping transcoding scenarios have not been individually validated

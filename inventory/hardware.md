@@ -18,7 +18,9 @@ Recorded: 2026-08-31
 ## Graphics
 
 - Intel UHD Graphics 770
-- Intended for Jellyfin Intel Quick Sync hardware acceleration
+- Exposed to the Jellyfin container as /dev/dri/renderD128
+- Intel iHD VA-API driver operational inside the official Jellyfin container
+- Jellyfin Intel Quick Sync hardware acceleration validated with a real H.264 QSV transcode
 
 ## Memory
 
