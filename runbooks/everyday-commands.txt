@@ -49,7 +49,8 @@ https://10.0.0.6:9090
 
 Open in a web browser on the home network. Cockpit is the graphical server
 administration interface for CPU/RAM, storage, networking, services, logs,
-updates, a terminal, and other system tasks.
+a terminal, and other system tasks. Its Software Updates page currently has a
+known false-offline issue; use apt as described in section 16 for updates.
 
 Jellyfin at home:
 http://10.0.0.6:8096
@@ -359,6 +360,15 @@ sudo apt upgrade
 
 Installs normal available package upgrades. Perform upgrades deliberately rather
 than blindly during other server changes.
+
+APT is currently the authoritative update method. Cockpit itself is operational,
+but its Software Updates page may report "Cannot refresh cache whilst offline"
+even while server networking and apt work normally. Do not change working network
+configuration solely to fix this Cockpit/PackageKit/NetworkManager false-offline
+behavior. It is a low-priority backlog item.
+
+Ubuntu phased updates may remain listed after a successful upgrade. Do not force
+them merely to make the list empty; allow them to roll out normally.
 
 ============================================================
 17. GENERAL SYSTEMD SERVICE STATUS

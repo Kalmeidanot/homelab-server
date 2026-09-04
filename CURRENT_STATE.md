@@ -49,6 +49,25 @@ Currently installed/configured:
   Cockpit and Docker/containerd started automatically, /srv/storage remained available,
   and existing server services remained operational
 
+## Ubuntu Maintenance
+
+- The 2026-09-04 maintenance pass completed successfully, including Docker/containerd
+  and Ubuntu kernel/security package updates.
+- The server is currently booted into Linux 7.0.0-31-generic.
+- Three updates remain deferred by Ubuntu phased updates: libaudit-common, libaudit1,
+  and libflashrom1. They were not forced and should roll out normally.
+- The separate available firmware update has not been performed.
+
+### Known Cockpit Software Updates issue
+
+- Cockpit itself is operational, but its Software Updates page currently reports
+  `Cannot refresh cache whilst offline` even though the server is online and normal
+  apt networking and update operations work.
+- This appears to be the known Cockpit/PackageKit/NetworkManager false-offline
+  behavior on Ubuntu Server. Do not change working server networking solely to fix
+  this cosmetic/update-UI issue.
+- apt is the authoritative update method until this low-priority issue is revisited.
+
 ## Remote Access
 
 - Tailscale hostname: homelab
