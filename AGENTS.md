@@ -20,6 +20,12 @@ After making a meaningful server change:
 7. Update CURRENT_STATE.md if intended server state changed.
 8. Commit relevant documentation and configuration changes to Git.
 
+Whenever a server change affects user-facing operational commands, service names,
+URLs, LAN or Tailscale addresses, storage paths, startup/autostart behavior,
+routine troubleshooting steps, or commonly used health checks, review
+runbooks/everyday-commands.txt and update it if needed as part of the same
+documented change. Do not edit it when nothing relevant changed.
+
 For destructive operations such as formatting disks, deleting Docker volumes,
 changing boot configuration, altering SSH access, changing firewall/network
 configuration, or deleting significant data, stop and obtain explicit user

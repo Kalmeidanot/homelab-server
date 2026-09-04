@@ -62,6 +62,11 @@ Not yet installed:
 - Off-site Jellyfin access over Tailscale is validated at
   http://100.83.35.13:8096: authentication and video playback both succeeded
 
+## Operational Reference
+
+- runbooks/everyday-commands.txt is the canonical everyday command reference for
+  routine access, health checks, service checks, and safe restart/shutdown tasks
+
 ## Docker
 
 - Docker Engine: 29.7.2

@@ -13,3 +13,7 @@ It documents:
 - validation performed after changes
 
 Secrets such as passwords, API tokens, private keys and recovery codes must never be committed.
+
+The canonical beginner-friendly operational reference is:
+
+[runbooks/everyday-commands.txt](runbooks/everyday-commands.txt)

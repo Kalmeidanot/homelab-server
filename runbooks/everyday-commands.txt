@@ -1,0 +1,408 @@
+============================================================
+HOMELAB / NAS EVERYDAY COMMAND CHEAT SHEET
+============================================================
+
+This is the canonical everyday command reference for the homelab.
+Commands marked "run on Windows" go in Windows Terminal or PowerShell.
+Commands marked "run on the server" go inside an SSH session on homelab.
+
+CURRENT SERVER DETAILS
+
+Server hostname: homelab
+Linux admin user: kaian
+Current observed home/LAN IPv4: 10.0.0.6
+Current Tailscale IPv4: 100.83.35.13
+Primary storage mount: /srv/storage
+Windows Samba share: \\10.0.0.6\Media
+Cockpit home URL: https://10.0.0.6:9090
+Jellyfin home URL: http://10.0.0.6:8096
+Jellyfin Tailscale/off-site URL: http://100.83.35.13:8096
+
+IMPORTANT: 10.0.0.6 is the current observed LAN IP. It is assigned by DHCP and
+may change until a DHCP reservation is configured.
+
+============================================================
+1. CONNECT TO THE SERVER FROM WINDOWS
+============================================================
+
+ssh kaian@10.0.0.6
+
+Run from Windows Terminal or PowerShell. Connects to the Lenovo over the home
+network. Enter the Ubuntu password when asked.
+
+exit
+
+Run inside SSH. Disconnects safely. It does not shut down the server.
+
+ping 10.0.0.6
+
+Run from Windows for a quick home-network reachability test. Press Ctrl+C to stop.
+
+============================================================
+2. WEB INTERFACES
+============================================================
+
+Cockpit:
+https://10.0.0.6:9090
+
+Open in a web browser on the home network. Cockpit is the graphical server
+administration interface for CPU/RAM, storage, networking, services, logs,
+updates, a terminal, and other system tasks.
+
+Jellyfin at home:
+http://10.0.0.6:8096
+
+Open in a web browser or Jellyfin client on the home network.
+
+Jellyfin remotely through Tailscale:
+http://100.83.35.13:8096
+
+Open on a device connected to the same private Tailscale network.
+
+Windows Samba share:
+\\10.0.0.6\Media
+
+Enter this in Windows File Explorer's address bar or press Windows + R and enter
+it there. It contains the media folders.
+
+============================================================
+3. TAILSCALE / REMOTE ACCESS
+============================================================
+
+Run these commands on the server inside SSH.
+
+tailscale status
+
+Shows devices visible on the private Tailscale network.
+
+tailscale ip -4
+
+Shows the server's Tailscale IPv4.
+Expected current value: 100.83.35.13
+
+systemctl is-active tailscaled
+
+Expected output: active
+
+Tailscale is configured to start automatically. Normally, do NOT run
+"sudo tailscale up" again.
+
+Remote Jellyfin access has been successfully tested over mobile data. The client
+device must normally be connected to the same Tailscale network. A random TV
+outside the house cannot currently use the Tailscale address unless that TV or
+device also supports Tailscale. Universal Jellyfin access from arbitrary TVs and
+devices is a future backlog item.
+
+============================================================
+4. BASIC LINUX NAVIGATION
+============================================================
+
+Run these commands on the server inside SSH.
+
+pwd
+
+Shows the current Linux directory.
+
+ls
+
+Lists files and folders in the current directory.
+
+cd ~/nas-admin
+
+Moves into the server-management repository.
+
+cd ~
+
+Returns to the user's Linux home directory.
+
+============================================================
+5. START CODEX
+============================================================
+
+Run these commands on the server inside SSH.
+
+cd ~/nas-admin
+
+codex
+
+Codex should normally be started from ~/nas-admin so it can read AGENTS.md and
+the server-management documentation. Codex is primarily used for documentation,
+inspection, configuration generation, and repetitive safe work. Privileged or
+destructive root operations should remain explicit.
+
+============================================================
+6. CHECK STORAGE
+============================================================
+
+Run these commands on the server inside SSH.
+
+findmnt /srv/storage
+
+Confirms that the 12 TB WD My Book is mounted.
+
+df -hT /srv/storage
+
+Shows its filesystem type, used space, and free space.
+
+ls /srv/storage/media
+
+Shows the main media directories.
+
+============================================================
+7. CHECK WD MY BOOK TEMPERATURE
+============================================================
+
+Run on the server inside SSH.
+
+sudo smartctl -A /dev/sda | grep Temperature_Celsius
+
+Reads the WD My Book hard-drive temperature, not the Lenovo CPU temperature.
+Enter the Ubuntu password if asked.
+
+Example output ending:
+... 47 (Min/Max 23/54)
+
+47 = current HDD temperature
+23 = lowest recorded temperature
+54 = highest recorded temperature
+
+============================================================
+8. QUICK SERVER HEALTH CHECK
+============================================================
+
+Run these three commands on the server inside SSH. Together they are the quickest
+general "is everything alive?" check.
+
+systemctl is-active ssh cockpit.socket smbd docker containerd tailscaled
+
+Expected healthy output, one line per service:
+active
+active
+active
+active
+active
+active
+
+findmnt /srv/storage
+
+The WD My Book should be listed as mounted at /srv/storage.
+
+sudo docker ps
+
+Shows running containers. Jellyfin should normally appear as a running container.
+
+============================================================
+9. JELLYFIN / DOCKER
+============================================================
+
+Run these commands on the server inside SSH.
+
+sudo docker ps
+
+Shows running Docker containers.
+
+cd ~/nas-admin/compose/jellyfin
+
+sudo docker compose ps
+
+Shows Jellyfin container status specifically.
+
+sudo docker logs --tail 50 jellyfin
+
+Shows the newest 50 Jellyfin log lines.
+
+Before the next two Compose commands, first run:
+
+cd ~/nas-admin/compose/jellyfin
+
+sudo docker compose restart jellyfin
+
+Restarts only Jellyfin.
+WARNING: Active Jellyfin viewers will be disconnected.
+
+sudo docker compose up -d
+
+Starts Jellyfin from the Compose configuration if it is stopped. "-d" means
+detached/background mode.
+
+============================================================
+10. JELLYFIN HARDWARE ACCELERATION
+============================================================
+
+Intel Quick Sync hardware transcoding has been formally validated.
+
+Confirmed hardware: Intel UHD Graphics 770
+Render device: /dev/dri/renderD128
+
+A real H.264 QSV transcode was successfully validated through Jellyfin. No normal
+startup command is required; Docker and Jellyfin retain the configuration
+automatically. This does not mean every codec or tone-mapping scenario has been
+tested.
+
+============================================================
+11. SAMBA / WINDOWS FILE SHARING
+============================================================
+
+Run these commands on the server inside SSH.
+
+systemctl is-active smbd
+
+Expected output: active
+
+sudo systemctl status smbd --no-pager
+
+Shows more detailed Samba status.
+
+Run this path from Windows File Explorer or Windows + R:
+
+\\10.0.0.6\Media
+
+This is the Windows network share path for the media folders.
+
+============================================================
+12. CHECK GIT / DOCUMENTATION
+============================================================
+
+Run these commands on the server inside SSH.
+
+cd ~/nas-admin
+
+git status
+
+Shows whether repository files have uncommitted changes.
+
+git log --oneline -5
+
+Shows the five latest Git commits.
+
+============================================================
+13. SAFE SERVER SHUTDOWN
+============================================================
+
+Before shutdown, check that:
+- no Samba or other file transfer is running
+- nobody is actively using Jellyfin
+- no disk test is running
+- no important installation or update is running
+
+Run on the server inside SSH only after those checks.
+
+sudo shutdown -h now
+
+Safely shuts down the Lenovo. Wait until the machine is fully powered off before
+removing power.
+
+============================================================
+14. SAFE REBOOT
+============================================================
+
+NO FILE TRANSFER should be running first. Also check that nobody is actively
+using Jellyfin.
+
+Run on the server inside SSH.
+
+sudo reboot
+
+Safely restarts Ubuntu. This temporarily stops Jellyfin, Samba/file transfers,
+Cockpit, SSH, Docker containers, and Tailscale.
+
+After roughly 1-2 minutes, reconnect from Windows Terminal or PowerShell:
+
+ssh kaian@10.0.0.6
+
+============================================================
+15. CHECK FOR UBUNTU UPDATES
+============================================================
+
+Run these commands on the server inside SSH.
+
+sudo apt update
+
+Refreshes the available-package list. It does not install upgrades.
+
+apt list --upgradable
+
+Shows available upgrades.
+
+sudo apt upgrade
+
+Installs normal available package upgrades. Perform upgrades deliberately rather
+than blindly during other server changes.
+
+============================================================
+16. GENERAL SYSTEMD SERVICE STATUS
+============================================================
+
+Run on the server inside SSH.
+
+sudo systemctl status SERVICENAME --no-pager
+
+Replace SERVICENAME with a service such as:
+docker
+containerd
+smbd
+ssh
+cockpit.socket
+tailscaled
+
+Example:
+
+sudo systemctl status docker --no-pager
+
+============================================================
+17. WHAT STARTS AUTOMATICALLY
+============================================================
+
+Normally, you do NOT manually start these after a normal reboot:
+- Ethernet/networking
+- SSH
+- Cockpit
+- WD My Book mount
+- Samba
+- Docker
+- containerd
+- Jellyfin
+- Tailscale
+
+Normal startup:
+1. Power on the Lenovo.
+2. Wait roughly 1-2 minutes.
+3. Use SSH, Cockpit, or Jellyfin normally.
+
+SSH from Windows Terminal or PowerShell:
+
+ssh kaian@10.0.0.6
+
+Cockpit:
+https://10.0.0.6:9090
+
+Jellyfin at home:
+http://10.0.0.6:8096
+
+Jellyfin remotely through Tailscale:
+http://100.83.35.13:8096
+
+============================================================
+18. SAFETY RULES
+============================================================
+
+STOP AND CHECK WHETHER A FILE TRANSFER IS CURRENTLY RUNNING before doing anything
+involving:
+- reboot
+- shutdown
+- networking
+- Tailscale networking changes
+- Samba restart
+- disk mount or unmount
+- filesystem permissions
+- Docker networking
+- storage changes
+
+Also check whether someone is actively watching Jellyfin before:
+- restarting Jellyfin
+- restarting Docker
+- rebooting or shutting down the server
+
+When unsure, stop and inspect first. Do not paste commands you do not understand,
+and do not put passwords, API keys, tokens, private keys, recovery codes,
+encryption keys, or Codex authentication contents into documentation or Git.
