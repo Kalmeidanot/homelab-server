@@ -17,6 +17,8 @@ Windows Samba share: \\10.0.0.6\Media
 Cockpit home URL: https://10.0.0.6:9090
 Jellyfin home URL: http://10.0.0.6:8096
 Jellyfin Tailscale/off-site URL: http://100.83.35.13:8096
+Immich home URL: http://10.0.0.6:2283
+Immich Tailscale/off-site URL: http://100.83.35.13:2283
 
 IMPORTANT: 10.0.0.6 is the current observed LAN IP. It is assigned by DHCP and
 may change until a DHCP reservation is configured.
@@ -58,6 +60,17 @@ Jellyfin remotely through Tailscale:
 http://100.83.35.13:8096
 
 Open on a device connected to the same private Tailscale network.
+
+Immich at home:
+http://10.0.0.6:2283
+
+Open in a web browser or Immich client on the home network.
+
+Immich remotely through Tailscale:
+http://100.83.35.13:2283
+
+Open on a device connected to the same private Tailscale network. Immich is not
+intentionally exposed directly to the public Internet.
 
 Windows Samba share:
 \\10.0.0.6\Media
@@ -189,7 +202,8 @@ The WD My Book should be listed as mounted at /srv/storage.
 
 sudo docker ps
 
-Shows running containers. Jellyfin should normally appear as a running container.
+Shows running containers. Jellyfin and the four Immich containers should normally
+appear as running containers.
 
 ============================================================
 9. JELLYFIN / DOCKER
@@ -226,7 +240,24 @@ Starts Jellyfin from the Compose configuration if it is stopped. "-d" means
 detached/background mode.
 
 ============================================================
-10. JELLYFIN HARDWARE ACCELERATION
+10. IMMICH / DOCKER
+============================================================
+
+Run these commands on the server inside SSH.
+
+cd ~/nas-admin/compose/immich
+
+sudo docker compose ps
+
+Shows Immich service/container health. The server, machine-learning, PostgreSQL,
+and Valkey containers should normally be healthy.
+
+sudo docker compose logs --tail 50
+
+Shows the newest 50 log lines from the Immich stack.
+
+============================================================
+11. JELLYFIN HARDWARE ACCELERATION
 ============================================================
 
 Intel Quick Sync hardware transcoding has been formally validated.
@@ -240,7 +271,7 @@ automatically. This does not mean every codec or tone-mapping scenario has been
 tested.
 
 ============================================================
-11. SAMBA / WINDOWS FILE SHARING
+12. SAMBA / WINDOWS FILE SHARING
 ============================================================
 
 Run these commands on the server inside SSH.
@@ -260,7 +291,7 @@ Run this path from Windows File Explorer or Windows + R:
 This is the Windows network share path for the media folders.
 
 ============================================================
-12. CHECK GIT / DOCUMENTATION
+13. CHECK GIT / DOCUMENTATION
 ============================================================
 
 Run these commands on the server inside SSH.
@@ -276,7 +307,7 @@ git log --oneline -5
 Shows the five latest Git commits.
 
 ============================================================
-13. SAFE SERVER SHUTDOWN
+14. SAFE SERVER SHUTDOWN
 ============================================================
 
 Before shutdown, check that:
@@ -293,7 +324,7 @@ Safely shuts down the Lenovo. Wait until the machine is fully powered off before
 removing power.
 
 ============================================================
-14. SAFE REBOOT
+15. SAFE REBOOT
 ============================================================
 
 NO FILE TRANSFER should be running first. Also check that nobody is actively
@@ -311,7 +342,7 @@ After roughly 1-2 minutes, reconnect from Windows Terminal or PowerShell:
 ssh kaian@10.0.0.6
 
 ============================================================
-15. CHECK FOR UBUNTU UPDATES
+16. CHECK FOR UBUNTU UPDATES
 ============================================================
 
 Run these commands on the server inside SSH.
@@ -330,7 +361,7 @@ Installs normal available package upgrades. Perform upgrades deliberately rather
 than blindly during other server changes.
 
 ============================================================
-16. GENERAL SYSTEMD SERVICE STATUS
+17. GENERAL SYSTEMD SERVICE STATUS
 ============================================================
 
 Run on the server inside SSH.
@@ -350,7 +381,7 @@ Example:
 sudo systemctl status docker --no-pager
 
 ============================================================
-17. WHAT STARTS AUTOMATICALLY
+18. WHAT STARTS AUTOMATICALLY
 ============================================================
 
 Normally, you do NOT manually start these after a normal reboot:
@@ -362,6 +393,7 @@ Normally, you do NOT manually start these after a normal reboot:
 - Docker
 - containerd
 - Jellyfin
+- Immich
 - Tailscale
 
 Normal startup:
@@ -382,8 +414,14 @@ http://10.0.0.6:8096
 Jellyfin remotely through Tailscale:
 http://100.83.35.13:8096
 
+Immich at home:
+http://10.0.0.6:2283
+
+Immich remotely through Tailscale:
+http://100.83.35.13:2283
+
 ============================================================
-18. SAFETY RULES
+19. SAFETY RULES
 ============================================================
 
 STOP AND CHECK WHETHER A FILE TRANSFER IS CURRENTLY RUNNING before doing anything

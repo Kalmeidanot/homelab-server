@@ -42,14 +42,12 @@ Currently installed/configured:
 - Docker Compose v5.5.0
 - Docker and containerd services are active
 - Jellyfin deployed through Docker Compose with host networking
+- Immich v3.1.0 deployed through Docker Compose; local and Tailscale access,
+  uploads, machine learning, and reboot/autostart behavior are validated
 - Codex CLI and bubblewrap administration tooling
 - Post-deployment reboot validation completed successfully: remote SSH access returned,
   Cockpit and Docker/containerd started automatically, /srv/storage remained available,
   and existing server services remained operational
-
-Not yet installed:
-
-- Immich
 
 ## Remote Access
 
@@ -61,6 +59,9 @@ Not yet installed:
 - Router port forwarding has not intentionally exposed Jellyfin port 8096 publicly
 - Off-site Jellyfin access over Tailscale is validated at
   http://100.83.35.13:8096: authentication and video playback both succeeded
+- Off-site Immich access over Tailscale is validated at
+  http://100.83.35.13:2283; port 2283 is not intentionally exposed directly
+  to the public Internet
 
 ## Operational Reference
 
@@ -101,3 +102,29 @@ Not yet installed:
   transcoding; the Jellyfin FFmpeg log confirmed VA-API initialization, QSV device
   derivation and use of the h264_qsv encoder
 - Other codec and tone-mapping transcoding scenarios have not been individually validated
+
+## Immich
+
+- Version: v3.1.0
+- Compose directory: ~/nas-admin/compose/immich
+- Compose definition: ~/nas-admin/compose/immich/docker-compose.yml
+- Secret environment file: ~/nas-admin/compose/immich/.env (Git-ignored and untracked)
+- Containers: immich_server, immich_machine_learning, immich_postgres, and
+  immich_redis; all four were confirmed healthy after initial startup
+- Browser access: http://10.0.0.6:2283
+- Tailscale/off-site access: http://100.83.35.13:2283
+- Immich-managed uploads and derived data: /srv/storage/photos/immich on the
+  WD My Book; this tree must not be manually edited behind Immich's back
+- PostgreSQL data: /srv/immich/postgres on the internal SSD
+- PostgreSQL and Valkey are not intentionally exposed as user-facing host services
+- Host prerequisite: /etc/sysctl.d/99-immich.conf sets vm.overcommit_memory=1;
+  the runtime setting was verified as 1
+- Initial/admin account creation, browser and phone uploads, immediate mobile-upload
+  visibility, timeline, thumbnails, photo viewing, and machine-learning health were
+  successfully validated
+- Test data was confirmed under both persistent storage paths. At that point the
+  Immich-managed tree used about 266 MB and PostgreSQL used about 312 MB; these
+  were initial observations, not expected fixed sizes
+- Remote phone access through Tailscale was validated away from the home LAN
+- Reboot/autostart validation succeeded: Ubuntu and SSH returned, the Compose stack
+  returned automatically, and Immich became available without manual startup

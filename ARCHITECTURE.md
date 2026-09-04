@@ -42,18 +42,21 @@ mounts this media tree read-only at /media.
 - Samba: installed and operational
 - Jellyfin: deployed with Docker Compose and host networking
 - Tailscale: installed and operational for private remote access
-- Immich: planned
+- Immich: deployed with Docker Compose
 
 ## Remote access
 
-Tailscale is the current safe/default method for remote Jellyfin access. The
-server participates as `homelab` with Tailscale IPv4 100.83.35.13 while retaining
-its normal home-LAN IPv4 10.0.0.6. Jellyfin is reachable by authenticated devices
-on the same tailnet at http://100.83.35.13:8096.
+Tailscale is the current safe/default method for remote Jellyfin and Immich
+access. The server participates as `homelab` with Tailscale IPv4 100.83.35.13
+while retaining its normal home-LAN IPv4 10.0.0.6. Jellyfin is reachable by
+authenticated devices on the same tailnet at http://100.83.35.13:8096.
+Immich is reachable by authenticated devices on the same tailnet at
+http://100.83.35.13:2283.
 
 The server is not configured as a Tailscale exit node or subnet router. Tailscale
 SSH and Funnel are not enabled, and Jellyfin port 8096 has not intentionally been
-published through router port forwarding.
+published through router port forwarding. Immich port 2283 likewise has not been
+intentionally exposed directly to the public Internet.
 
 ### Low-priority backlog: Universal Jellyfin remote access
 
@@ -74,6 +77,34 @@ Intel graphics acceleration. Jellyfin is configured to use Intel Quick Sync
 transcode have been successfully validated. This confirms the hardware path for
 that tested scenario; it does not establish that every codec or tone-mapping
 scenario has been tested.
+
+## Immich
+
+Immich v3.1.0 runs as a Docker Compose stack from compose/immich. The application
+stack consists of the Immich server, machine-learning service, PostgreSQL, and
+Valkey. PostgreSQL and Valkey are internal stack dependencies rather than
+intentionally exposed user-facing host services.
+
+Persistent data is separated by workload: PostgreSQL data lives on the internal
+SSD at /srv/immich/postgres, while large Immich-managed photo/video content,
+thumbnails, generated or encoded media, backups, and other upload-location data
+live on the WD My Book at /srv/storage/photos/immich. The latter is application-
+managed storage and must not be treated as a manually managed Samba photo tree.
+
+The host prerequisite vm.overcommit_memory=1 is persisted in
+/etc/sysctl.d/99-immich.conf for Valkey. Immich is available on the LAN at
+http://10.0.0.6:2283 and privately off-site through Tailscale at
+http://100.83.35.13:2283. Initial functional, remote-access, and reboot/autostart
+validation has completed successfully.
+
+### Future evaluation: Lightroom archive
+
+Evaluate a future human-managed Adobe Lightroom archive at
+/srv/storage/photos/lightroom, potentially exposed through a separate Samba
+Photos share and indexed by Immich as a read-only External Library. This is
+future work only: no directory, share, External Library, or archive modification
+has been performed. It must remain conceptually separate from Immich-managed
+upload storage.
 
 ## Administration
 

@@ -28,4 +28,7 @@ Status:
 - Initial SMART short and extended tests completed successfully.
 - Configured with an ext4 filesystem labeled STORAGE.
 - Mounted read/write at /srv/storage.
-- Used for bulk storage, including /srv/storage/media.
+- Used for bulk storage, including /srv/storage/media and Immich-managed data at
+  /srv/storage/photos/immich.
+
+The internal SSD also holds Immich PostgreSQL data at /srv/immich/postgres.
