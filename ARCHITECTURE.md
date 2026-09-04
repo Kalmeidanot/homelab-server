@@ -41,8 +41,26 @@ mounts this media tree read-only at /media.
 - Docker Engine / Docker Compose: installed and operational
 - Samba: installed and operational
 - Jellyfin: deployed with Docker Compose and host networking
-- Tailscale: planned
+- Tailscale: installed and operational for private remote access
 - Immich: planned
+
+## Remote access
+
+Tailscale is the current safe/default method for remote Jellyfin access. The
+server participates as `homelab` with Tailscale IPv4 100.83.35.13 while retaining
+its normal home-LAN IPv4 10.0.0.6. Jellyfin is reachable by authenticated devices
+on the same tailnet at http://100.83.35.13:8096.
+
+The server is not configured as a Tailscale exit node or subnet router. Tailscale
+SSH and Funnel are not enabled, and Jellyfin port 8096 has not intentionally been
+published through router port forwarding.
+
+### Low-priority backlog: Universal Jellyfin remote access
+
+Investigate later how to securely access Jellyfin from arbitrary TVs/devices that
+cannot run Tailscale, preferably through a normal HTTPS hostname. Compare reverse
+proxy, domain, and TLS approaches and their security implications. Tailscale
+remains the current safe/default remote-access method.
 
 ## Jellyfin
 

@@ -1,6 +1,6 @@
 # Current State
 
-Last updated: 2026-09-03
+Last updated: 2026-09-04
 
 ## Host
 
@@ -36,6 +36,8 @@ Currently installed/configured:
 - OpenSSH Server
 - Cockpit and cockpit-files
 - Samba; authenticated Media share at /srv/storage/media is operational
+- Tailscale from Tailscale's official Ubuntu 26.04 Resolute repository;
+  `tailscaled` is enabled and active
 - Docker Engine 29.7.2 from Docker's official Ubuntu repository
 - Docker Compose v5.5.0
 - Docker and containerd services are active
@@ -47,8 +49,18 @@ Currently installed/configured:
 
 Not yet installed:
 
-- Tailscale
 - Immich
+
+## Remote Access
+
+- Tailscale hostname: homelab
+- Tailscale IPv4: 100.83.35.13
+- Normal home-LAN IPv4 remains 10.0.0.6
+- Tailscale is used for private remote access only
+- No exit node, subnet router, Tailscale SSH, or Funnel/public exposure is enabled
+- Router port forwarding has not intentionally exposed Jellyfin port 8096 publicly
+- Off-site Jellyfin access over Tailscale is validated at
+  http://100.83.35.13:8096: authentication and video playback both succeeded
 
 ## Docker
 

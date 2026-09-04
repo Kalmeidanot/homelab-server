@@ -37,3 +37,12 @@ Current state:
 DOWN
 
 Ethernet is intended to be the normal connection for the server.
+
+## Tailscale
+
+- Hostname: homelab
+- IPv4 address: 100.83.35.13
+- `tailscaled` is enabled and active
+- Installed from Tailscale's official Ubuntu 26.04 Resolute repository
+- No exit-node, subnet-router, Tailscale SSH, or Funnel configuration is enabled
+- The normal home-LAN IPv4 remains 10.0.0.6
