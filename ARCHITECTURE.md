@@ -38,6 +38,9 @@ Storage roles are separate:
 - /srv/storage/media: Jellyfin-oriented media storage, exposed through the
   existing authenticated read/write Media Samba share
 - /srv/storage/media/movies: active Jellyfin Movies library (/media/movies)
+- /srv/storage/media/Pokemon/movies: retained Pokémon feature movies, outside
+  the active Movies library path but still within the Media Samba share and
+  Jellyfin's read-only /media mount; separate from Pokémon TV content
 - /srv/storage/media/disney: retained Disney/Pixar family movies and explicitly
   approved additional titles, outside the active Movies library path; still
   within the Media Samba share and Jellyfin's read-only /media mount

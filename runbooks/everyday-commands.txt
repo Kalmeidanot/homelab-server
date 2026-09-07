@@ -162,6 +162,14 @@ ls /srv/storage/media
 
 Shows the main media directories.
 
+ls /srv/storage/media/Pokemon/movies
+
+Shows the 14 retained Pokémon feature movies moved out of the active Movies
+directory. Windows path: \\10.0.0.6\Media\Pokemon\movies
+Existing names, including Norwegian titles, were preserved. Pokémon TV content
+was not moved. Jellyfin configuration was not changed and no scan was manually
+triggered; the administrator handles Jellyfin separately.
+
 ls /srv/storage/media/disney
 
 Shows the retained Disney/Pixar family movies and additional approved titles.

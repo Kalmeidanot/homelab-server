@@ -128,6 +128,10 @@ Currently installed/configured:
 - Intel render device: /dev/dri/renderD128
 - Supplemental render group GID: 991
 - Movies library: /media/movies
+- 14 approved Pokémon feature-movie folders were moved intact from
+  /srv/storage/media/movies to /srv/storage/media/Pokemon/movies on 2026-09-07,
+  outside the active Movies library path. Pokémon TV content was not moved;
+  Jellyfin configuration and manual library scans were left to the administrator.
 - 117 approved Disney/Pixar family and additional user-selected movie folders
   were moved intact from /srv/storage/media/movies to /srv/storage/media/disney
   on 2026-09-07; the latter is outside the configured /media/movies library path
