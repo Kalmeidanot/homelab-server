@@ -116,6 +116,7 @@ Currently installed/configured:
 
 ## Jellyfin
 
+- Running server/API version verified on 2026-09-07: 10.11.11
 - Compose definition: ~/nas-admin/compose/jellyfin/compose.yaml
 - Image: jellyfin/jellyfin:latest
 - Container: jellyfin
@@ -141,7 +142,12 @@ Currently installed/configured:
 - Initial setup and browser/TV playback testing completed successfully
 - Reboot/autostart validation completed successfully: the container started through
   its restart policy and the web interface became available without manual startup
-- Initial metadata/library scan is still being allowed to finish
+- Administrator confirmed a fresh library scan completed after the media moves
+- On 2026-09-07, 36 approved empty BoxSets were removed through the supported
+  HTTP API after immediate type and recursive-membership checks. All 23 populated
+  collections and their membership remained intact; no empty collections remained
+  at verification. Media IDs and filesystem metadata were unchanged, and the
+  Jellyfin health endpoint reported Healthy. No restart or manual scan was triggered
 - Hardware acceleration: Intel Quick Sync (QSV) using Intel UHD Graphics 770
 - Intel iHD VA-API driver and /dev/dri/renderD128 access validated inside the container
 - A real H.264 QSV transcode was successfully validated through forced playback
