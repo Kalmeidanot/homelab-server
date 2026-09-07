@@ -24,7 +24,8 @@ The internal SSD is intended for:
 ## WD My Book 12 TB
 
 The external HDD is configured as an ext4 filesystem labeled STORAGE and mounted
-read/write at /srv/storage. It provides bulk data storage such as:
+read/write at /srv/storage and remains permanently connected. It provides bulk
+data storage such as:
 
 - photos and videos
 - movies
@@ -32,9 +33,23 @@ read/write at /srv/storage. It provides bulk data storage such as:
 - shared files
 - other large personal data
 
-Media is stored below /srv/storage/media and is shared over Samba for authenticated
-read/write access. Containers should receive only the access they require; Jellyfin
-mounts this media tree read-only at /media.
+Storage roles are separate:
+
+- /srv/storage/media: Jellyfin-oriented media storage, exposed through the
+  existing authenticated read/write Media Samba share
+- /srv/storage/photos/immich: Immich-managed application storage that must not
+  be manually reorganized
+- /srv/storage/archive: human-managed long-term archive, exposed through the
+  authenticated read/write Archive Samba share for kaian
+- /srv/storage/archive/merged: planned final location for the consolidated
+  historical personal photo/video collection
+
+Only the archive destination and share have been prepared; the consolidation
+has not begun. Software such as Immich may index the archive in the future,
+but no Immich External Library is configured for it now.
+
+Containers should receive only the access they require; Jellyfin mounts
+/srv/storage/media read-only at /media.
 
 ## Core services
 
@@ -102,9 +117,10 @@ validation has completed successfully.
 Evaluate a future human-managed Adobe Lightroom archive at
 /srv/storage/photos/lightroom, potentially exposed through a separate Samba
 Photos share and indexed by Immich as a read-only External Library. This is
-future work only: no directory, share, External Library, or archive modification
-has been performed. It must remain conceptually separate from Immich-managed
-upload storage.
+future work only: no Lightroom-specific directory, Photos share, or External
+Library has been configured. This proposal is separate from the general-purpose
+/srv/storage/archive area and must remain conceptually separate from
+Immich-managed upload storage.
 
 ## Administration
 

@@ -1,6 +1,6 @@
 # Current State
 
-Last updated: 2026-09-04
+Last updated: 2026-09-07
 
 ## Host
 
@@ -27,6 +27,13 @@ External storage:
 - Configured with an ext4 filesystem labeled STORAGE
 - Mounted read/write at /srv/storage
 - Provides bulk storage, including /srv/storage/media
+- Remains permanently connected to the homelab
+- /srv/storage/archive is the human-managed bulk archive area
+- /srv/storage/archive/merged is the target root for the upcoming historical
+  personal photo/video consolidation; only destination/share preparation is
+  complete, and the merge has not begun
+- The archive is separate from Jellyfin media at /srv/storage/media and
+  Immich-managed storage at /srv/storage/photos/immich
 
 ## Services
 
@@ -35,7 +42,8 @@ Currently installed/configured:
 - Ubuntu Server
 - OpenSSH Server
 - Cockpit and cockpit-files
-- Samba; authenticated Media share at /srv/storage/media is operational
+- Samba; authenticated read/write Media share at /srv/storage/media and Archive
+  share at /srv/storage/archive are operational
 - Tailscale from Tailscale's official Ubuntu 26.04 Resolute repository;
   `tailscaled` is enabled and active
 - Docker Engine 29.7.2 from Docker's official Ubuntu repository
@@ -86,6 +94,16 @@ Currently installed/configured:
 
 - runbooks/everyday-commands.txt is the canonical everyday command reference for
   routine access, health checks, service checks, and safe restart/shutdown tasks
+
+## Samba Archive Share
+
+- Archive maps to /srv/storage/archive with authenticated read/write access for kaian
+- Windows access: `\\homelab\Archive`; IP-path fallback: `\\10.0.0.6\Archive`
+- Both /srv/storage/archive and /srv/storage/archive/merged were created with
+  owner/group kaian:kaian and directory permissions 0775
+- Windows access, visibility of merged, and create/write/rename/delete behavior
+  were successfully validated; temporary test items were removed
+- No Immich External Library is configured for this archive
 
 ## Docker
 
