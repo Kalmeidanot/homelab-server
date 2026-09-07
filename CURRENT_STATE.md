@@ -128,6 +128,11 @@ Currently installed/configured:
 - Intel render device: /dev/dri/renderD128
 - Supplemental render group GID: 991
 - Movies library: /media/movies
+- 117 approved Disney/Pixar family and additional user-selected movie folders
+  were moved intact from /srv/storage/media/movies to /srv/storage/media/disney
+  on 2026-09-07; the latter is outside the configured /media/movies library path
+- Jellyfin configuration was not changed and no library scan was manually
+  triggered for this move; library refresh is left to the administrator
 - TV library: /media/tv-series
 - Initial setup and browser/TV playback testing completed successfully
 - Reboot/autostart validation completed successfully: the container started through

@@ -162,6 +162,15 @@ ls /srv/storage/media
 
 Shows the main media directories.
 
+ls /srv/storage/media/disney
+
+Shows the retained Disney/Pixar family movies and additional approved titles.
+These were moved out of /srv/storage/media/movies without deleting their contents.
+Windows access through the existing Media share: \\10.0.0.6\Media\disney
+The active Jellyfin Movies library remains /media/movies. The move did not change
+Jellyfin configuration or manually trigger a scan; the administrator handles
+Jellyfin library refresh separately.
+
 ============================================================
 7. CHECK WD MY BOOK TEMPERATURE
 ============================================================

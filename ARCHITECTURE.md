@@ -37,6 +37,10 @@ Storage roles are separate:
 
 - /srv/storage/media: Jellyfin-oriented media storage, exposed through the
   existing authenticated read/write Media Samba share
+- /srv/storage/media/movies: active Jellyfin Movies library (/media/movies)
+- /srv/storage/media/disney: retained Disney/Pixar family movies and explicitly
+  approved additional titles, outside the active Movies library path; still
+  within the Media Samba share and Jellyfin's read-only /media mount
 - /srv/storage/photos/immich: Immich-managed application storage that must not
   be manually reorganized
 - /srv/storage/archive: human-managed long-term archive, exposed through the
