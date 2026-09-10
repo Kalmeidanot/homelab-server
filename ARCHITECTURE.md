@@ -48,12 +48,35 @@ Storage roles are separate:
   be manually reorganized
 - /srv/storage/archive: human-managed long-term archive, exposed through the
   authenticated read/write Archive Samba share for kaian
-- /srv/storage/archive/merged: planned final location for the consolidated
-  historical personal photo/video collection
+- /srv/storage/archive/merged: consolidated human-managed personal archive
+- /srv/storage/archive/merged/Bilder og Video: organized photo/video tree intended
+  for Immich External Library indexing, separate from Immich-managed uploads
 
-Only the archive destination and share have been prepared; the consolidation
-has not begun. Software such as Immich may index the archive in the future,
-but no Immich External Library is configured for it now.
+The separate archive-management project completed automated organization using
+an intentional year / Norwegian month / event / device hierarchy, preserving
+original filenames and meaningful context. Former physical source drives have
+been evacuated within the intended scope and are no longer routine dependencies.
+Duplikater, Other, Explicitly review-blocked and Unreadable - Damaged are separate
+preservation/review categories. The H7 handoff records four optional user-manual
+cleanup files remaining; completed organization does not imply every review item
+was deleted or every placement uncertainty resolved.
+
+/srv/storage/archive/merged/hidden is USER_MANAGED_EXCLUDED. Automated work must
+not enumerate, stat, scan, hash, classify or modify that tree without a new explicit
+user authorization naming it.
+
+Start future archive work at /srv/storage/archive/00 - FUTURE AI START HERE.txt.
+The long-term management bundle is /srv/storage/archive/Archive.Management;
+the active detailed control plane is /home/kaian/media-archive-control. The bundle
+contains rules, current decisions, recovery guidance and the durable control
+snapshot control-snapshots/final-handoff-20260909T193542Z. It supports continuity
+without chat history or the internal SSD, provided the archive disk survives;
+it is not a second independent media backup. Read the latest pointers before
+future maintenance and never restore intentionally deleted media from old records.
+
+The existing authenticated read/write Samba Archive share continues to expose
+/srv/storage/archive for human management. Samba access and Immich container
+access are separate controls; no Samba configuration changed during this task.
 
 Containers should receive only the access they require; Jellyfin mounts
 /srv/storage/media read-only at /media.
@@ -118,6 +141,40 @@ The host prerequisite vm.overcommit_memory=1 is persisted in
 http://10.0.0.6:2283 and privately off-site through Tailscale at
 http://100.83.35.13:2283. Initial functional, remote-access, and reboot/autostart
 validation has completed successfully.
+
+### Personal archive External Library
+
+Compose provides exactly one additional bind mount on immich-server:
+`/srv/storage/archive/merged/Bilder og Video:/mnt/archive/bilder-og-video:ro`.
+Live application and container verification succeeded on 2026-09-10: Docker
+reports RW=false, container mount metadata reports ro, and top-level year entries
+are readable. Only Bilder og Video is selected: hidden, Duplikater, Other,
+Explicitly review-blocked and Unreadable - Damaged are siblings outside this mount.
+No whole-merged mount is used.
+
+The External Library itself has not been created or scanned. The administrator
+will create it through the web UI using /mnt/archive/bilder-og-video. Originals
+remain in their human-managed filesystem locations; External Library indexing
+does not copy them into /srv/storage/photos/immich. Thumbnails, previews and
+potentially encoded/transcoded video playback versions use the existing
+Immich-managed storage; records remain in PostgreSQL, with the existing
+machine-learning model cache retained. No derived-data locations are relocated.
+
+The intended visual layer offers thumbnails, timeline/search, face recognition,
+maps where metadata exists, albums, favorites, visual review and video playback.
+Albums, favorites and application grouping do not reorganize year/month/event/device
+folders. Folder View can later be enabled under Account Settings > Features >
+Folders to browse that hierarchy alongside the timeline.
+
+Phase 1 is read-only: the administrator's first scan must validate indexing,
+timestamps/dates, thumbnails, photos, videos and Canon R6 playback/transcoding.
+Phase 2 would require separate user approval and a documented change to this
+specific mount before allowing archive writes. With appropriate write access and
+application settings, Immich may write XMP sidecars and delete underlying external
+files when trash is emptied. That capability is not enabled now.
+
+See changes/2026-09-10-add-immich-archive-external-mount.md for application status,
+validation, the UI handoff and rollback.
 
 ### Future evaluation: Lightroom archive
 

@@ -1,6 +1,6 @@
 # Current State
 
-Last updated: 2026-09-07
+Last updated: 2026-09-10
 
 ## Host
 
@@ -29,9 +29,8 @@ External storage:
 - Provides bulk storage, including /srv/storage/media
 - Remains permanently connected to the homelab
 - /srv/storage/archive is the human-managed bulk archive area
-- /srv/storage/archive/merged is the target root for the upcoming historical
-  personal photo/video consolidation; only destination/share preparation is
-  complete, and the merge has not begun
+- /srv/storage/archive/merged is the consolidated personal archive root;
+  automated organization was completed by the separate archive-management project
 - The archive is separate from Jellyfin media at /srv/storage/media and
   Immich-managed storage at /srv/storage/photos/immich
 
@@ -105,6 +104,35 @@ Currently installed/configured:
   were successfully validated; temporary test items were removed
 - No Immich External Library is configured for this archive
 
+## Personal Media Archive
+
+- Primary archive: /srv/storage/archive/merged; normal organized photos/videos:
+  /srv/storage/archive/merged/Bilder og Video
+- Intentional hierarchy: year / Norwegian month / meaningful event / device where
+  appropriate. Original filenames and useful event/day structure are preserved.
+- Additional intentional categories include Duplikater (additional exact copies),
+  Other (non-media), Explicitly review-blocked, and Unreadable - Damaged.
+- /srv/storage/archive/merged/hidden is USER_MANAGED_EXCLUDED: no automated
+  enumeration, stat, scan, hashing, classification, reorganization or modification
+  unless the user explicitly authorizes that tree in a future task.
+- Former physical source drives were evacuated within the project's intended
+  scope; routine organization no longer depends on them.
+- Durable future-AI entry: /srv/storage/archive/00 - FUTURE AI START HERE.txt
+- Long-term rules, decisions, state and recovery instructions:
+  /srv/storage/archive/Archive.Management
+- Active detailed control plane: /home/kaian/media-archive-control
+- Durable control snapshot: Archive.Management/control-snapshots/
+  final-handoff-20260909T193542Z (beneath /srv/storage/archive). This protects
+  continuity after chat/internal-SSD loss if the archive disk survives; it is
+  not an independent backup of the archive media.
+- Evidence basis: the H7 handoff dated 2026-09-09 19:35:42 UTC records completed
+  automated organization with four SEQ-515 files pending optional user-manual
+  cleanup. That dated exception was not rechecked or acted on in this task.
+  Intentional deletions and retained review categories must not be treated as
+  failed transfers or automatically recovered.
+- See changes/2026-09-10-complete-personal-media-archive.md. Detailed multi-day
+  project history remains in Archive.Management rather than this repository.
+
 ## Docker
 
 - Docker Engine: 29.7.2
@@ -168,6 +196,18 @@ Currently installed/configured:
 - Immich-managed uploads and derived data: /srv/storage/photos/immich on the
   WD My Book; this tree must not be manually edited behind Immich's back
 - PostgreSQL data: /srv/immich/postgres on the internal SSD
+- External archive mount applied and verified on 2026-09-10:
+  /srv/storage/archive/merged/Bilder og Video -> /mnt/archive/bilder-og-video,
+  READ-ONLY. Docker reports RW=false and container mount metadata reports ro;
+  the directory is readable and its top-level years were listed successfully.
+  This exposes only the organized tree, not sibling archive categories or hidden.
+- All four Immich containers were healthy before and after application; only
+  immich_server was recreated, with the same image. Local HTTP returned 200.
+- The administrator still needs to create the archive External Library and run
+  its first scan through the web UI. No underlying archive deletion is enabled.
+- External Library originals stay in the human-managed archive; later indexing
+  creates derived/application data in the existing Immich storage architecture,
+  not another copy of the originals under the upload location.
 - PostgreSQL and Valkey are not intentionally exposed as user-facing host services
 - Host prerequisite: /etc/sysctl.d/99-immich.conf sets vm.overcommit_memory=1;
   the runtime setting was verified as 1
