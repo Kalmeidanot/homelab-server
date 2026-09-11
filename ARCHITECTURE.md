@@ -144,37 +144,28 @@ validation has completed successfully.
 
 ### Personal archive External Library
 
-Compose provides exactly one additional bind mount on immich-server:
-`/srv/storage/archive/merged/Bilder og Video:/mnt/archive/bilder-og-video:ro`.
-Live application and container verification succeeded on 2026-09-10: Docker
-reports RW=false, container mount metadata reports ro, and top-level year entries
-are readable. Only Bilder og Video is selected: hidden, Duplikater, Other,
-Explicitly review-blocked and Unreadable - Damaged are siblings outside this mount.
-No whole-merged mount is used.
+The existing library is indexed at /mnt/archive/bilder-og-video. Its sole archive
+bind is intentionally READ-WRITE following explicit user authorization on 2026-09-11:
+`/srv/storage/archive/merged/Bilder og Video:/mnt/archive/bilder-og-video:rw`.
+Docker RW=true and container rw flags were independently verified. Only Bilder og
+Video is mounted; hidden and all sibling categories remain outside Immich's access.
 
-The External Library itself has not been created or scanned. The administrator
-will create it through the web UI using /mnt/archive/bilder-og-video. Originals
-remain in their human-managed filesystem locations; External Library indexing
-does not copy them into /srv/storage/photos/immich. Thumbnails, previews and
-potentially encoded/transcoded video playback versions use the existing
-Immich-managed storage; records remain in PostgreSQL, with the existing
-machine-learning model cache retained. No derived-data locations are relocated.
+The user may delete external assets through Immich, including their underlying
+archive files when trash is emptied. This service capability grants no deletion
+permission to AI/Codex. Reconcile later user actions with archive control history;
+do not automatically recover intentionally removed originals.
 
-The intended visual layer offers thumbnails, timeline/search, face recognition,
-maps where metadata exists, albums, favorites, visual review and video playback.
-Albums, favorites and application grouping do not reorganize year/month/event/device
-folders. Folder View can later be enabled under Account Settings > Features >
-Folders to browse that hierarchy alongside the timeline.
+Albums, favorites and application grouping do not reorganize physical year/month/
+event folders. External originals stay in the archive; uploads, thumbnails/previews,
+encoded playback data, PostgreSQL and model cache retain their existing locations.
+No sidecar/XMP-writing, metadata-editing or folder-reorganization setting was changed.
+The writable mount itself permits filesystem writes; it is not a deletion-only ACL.
 
-Phase 1 is read-only: the administrator's first scan must validate indexing,
-timestamps/dates, thumbnails, photos, videos and Canon R6 playback/transcoding.
-Phase 2 would require separate user approval and a documented change to this
-specific mount before allowing archive writes. With appropriate write access and
-application settings, Immich may write XMP sidecars and delete underlying external
-files when trash is emptied. That capability is not enabled now.
-
-See changes/2026-09-10-add-immich-archive-external-mount.md for application status,
-validation, the UI handoff and rollback.
+Only immich_server was recreated with its existing image/restart policy. Host
+permissions and dependency containers were unchanged. Disposeable/Xenomorph.jpg
+was left intact for the user's deletion test; UI deletion remains unverified.
+See changes/2026-09-11-immich-external-library-write-access.md for validation and
+read-only rollback. The 2026-09-10 read-only deployment record remains historical.
 
 ### Future evaluation: Lightroom archive
 

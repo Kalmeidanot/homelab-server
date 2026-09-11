@@ -1,6 +1,6 @@
 # Current State
 
-Last updated: 2026-09-10
+Last updated: 2026-09-11
 
 ## Host
 
@@ -102,7 +102,8 @@ Currently installed/configured:
   owner/group kaian:kaian and directory permissions 0775
 - Windows access, visibility of merged, and create/write/rename/delete behavior
   were successfully validated; temporary test items were removed
-- No Immich External Library is configured for this archive
+- Immich indexes only Bilder og Video through its separate, intentionally writable
+  External Library bind; sibling categories and hidden are not mounted.
 
 ## Personal Media Archive
 
@@ -196,15 +197,23 @@ Currently installed/configured:
 - Immich-managed uploads and derived data: /srv/storage/photos/immich on the
   WD My Book; this tree must not be manually edited behind Immich's back
 - PostgreSQL data: /srv/immich/postgres on the internal SSD
-- External archive mount applied and verified on 2026-09-10:
-  /srv/storage/archive/merged/Bilder og Video -> /mnt/archive/bilder-og-video,
-  READ-ONLY. Docker reports RW=false and container mount metadata reports ro;
-  the directory is readable and its top-level years were listed successfully.
-  This exposes only the organized tree, not sibling archive categories or hidden.
-- All four Immich containers were healthy before and after application; only
-  immich_server was recreated, with the same image. Local HTTP returned 200.
-- The administrator still needs to create the archive External Library and run
-  its first scan through the web UI. No underlying archive deletion is enabled.
+- External archive mount changed to READ-WRITE and verified on 2026-09-11:
+  /srv/storage/archive/merged/Bilder og Video -> /mnt/archive/bilder-og-video.
+  Docker reports RW=true and container mount metadata reports rw. Only this
+  organized tree is exposed; no whole archive/merged mount or hidden access.
+- The user already created/scanned this External Library. User-directed deletion
+  through Immich can now remove the underlying file when trash is emptied.
+  This does not authorize Codex/AI deletion or change archive organization rules.
+- Only immich_server was recreated, without pulling/upgrading images; other
+  container IDs, existing mounts, managed uploads, database and restart policies
+  were unchanged. All four containers healthy; local HTTP 200; database ready.
+- No host permission, XMP/sidecar/metadata setting or folder-organization change.
+  The writable filesystem boundary permits writes; no new unrelated app features
+  were enabled. Albums/favorites remain application state, not physical moves.
+- Disposeable/Xenomorph.jpg remains unchanged for the USER's Immich UI deletion
+  test. Capitalization is significant on Linux. No temporary write test was used.
+- See changes/2026-09-11-immich-external-library-write-access.md for evidence and
+  exact read-only rollback. User UI deletion outcome remains pending.
 - External Library originals stay in the human-managed archive; later indexing
   creates derived/application data in the existing Immich storage architecture,
   not another copy of the originals under the upload location.

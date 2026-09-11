@@ -290,44 +290,40 @@ sudo docker compose logs --tail 50
 
 Shows the newest 50 log lines from the Immich stack.
 
-External personal archive library (2026-09-10):
+External personal archive library (2026-09-11):
 
 Host source: /srv/storage/archive/merged/Bilder og Video
 Immich container path: /mnt/archive/bilder-og-video
-Current mode: READ ONLY (:ro); Docker RW=false and container ro verified.
-Status: Applied and verified; all four containers healthy on 2026-09-10.
-The External Library itself has not been created or scanned.
+Current mode: READ WRITE (:rw), intentionally authorized for user-directed deletion.
+The existing library has already been created/scanned by the administrator.
+Only Bilder og Video is exposed; hidden and sibling archive categories are excluded.
 
-The mount is ready. Use the Immich administrator web UI:
-Administration -> External Libraries -> Create Library -> select owner ->
-Add Folder (Add under Folders) -> /mnt/archive/bilder-og-video -> Scan.
-Some UI versions label the scan action "Scan New Library Files".
-Monitor Administration -> Jobs. Validate dates, thumbnails, photos, videos and
-Canon R6 playback/transcoding during the first scan/review.
+User deletion in Immich can now remove an external original when trash is emptied.
+AI/Codex no-delete rules remain unchanged. Albums/favorites do not move folders.
+No sidecar/XMP or metadata-writing setting was enabled by this mount change.
+Managed uploads/derived data remain at /srv/storage/photos/immich; PostgreSQL remains
+at /srv/immich/postgres. Do not manually edit that Immich-managed storage.
 
-Optional: Account Settings -> Features -> Folders enables browsing the underlying
-year/month/event hierarchy. Albums and favorites do not move filesystem folders.
-Originals remain in the archive; thumbnails and other derived/application data
-use the existing Immich storage. Immich-managed uploads/derived media remain at
-/srv/storage/photos/immich and PostgreSQL at /srv/immich/postgres.
-
-To check the bind without creating a test file:
+Read-only inspection commands (these commands do not create or delete files):
 
 sudo docker inspect immich_server --format '{{range .Mounts}}{{if eq .Destination "/mnt/archive/bilder-og-video"}}{{.Source}} -> {{.Destination}} RW={{.RW}}{{end}}{{end}}'
 
-Expected source: /srv/storage/archive/merged/Bilder og Video; RW=false.
-No output means the expected bind is missing. Do not start the scan in that case.
+Expected source: /srv/storage/archive/merged/Bilder og Video; RW=true.
 
-sudo docker exec immich_server sh -c 'test -d /mnt/archive/bilder-og-video && test -r /mnt/archive/bilder-og-video && test -x /mnt/archive/bilder-og-video && ls -1 /mnt/archive/bilder-og-video'
+sudo docker exec immich_server sh -c 'test -d /mnt/archive/bilder-og-video && test -r /mnt/archive/bilder-og-video && test -w /mnt/archive/bilder-og-video && test -x /mnt/archive/bilder-og-video'
 
-Lists only the selected tree's top-level entries, not a recursive archive scan.
-Do not make a test file to check read-only access. This mount excludes sibling
-hidden, Duplikater, Other, Explicitly review-blocked and Unreadable - Damaged.
-Future write access, XMP sidecar writes and underlying original deletion require
-separate user approval and a documented Compose change removing :ro from this
-specific mount. They are not enabled now.
+Disposable UI test, for the USER only:
+1. Open Xenomorph in Immich, then delete/trash it.
+2. Permanently remove the test asset from trash / empty trash if required.
+3. Check /srv/storage/archive/merged/Bilder og Video/Disposeable/Xenomorph.jpg.
+Linux uses the actual capitalized Disposeable and Xenomorph.jpg names.
+Codex did not delete or modify this test file; do not delete it with a shell command.
 
-See changes/2026-09-10-add-immich-archive-external-mount.md for status and rollback.
+Rollback: change only this bind's :rw back to :ro, then from this Compose directory:
+sudo docker compose config --quiet
+sudo docker compose up -d --no-deps --pull never immich-server
+Recheck Docker RW=false, health and local HTTP. Never remove volumes or reset data.
+See changes/2026-09-11-immich-external-library-write-access.md for the backup path.
 
 ============================================================
 11. JELLYFIN HARDWARE ACCELERATION
@@ -380,7 +376,7 @@ recovery snapshot. Active detailed control: /home/kaian/media-archive-control.
 The merged/hidden tree is USER_MANAGED_EXCLUDED: no automated listing, stat,
 scan, hashing or modification without fresh explicit authorization naming it.
 Do not restore intentionally deleted media from historical control records.
-Samba's human write access is separate from Immich's read-only archive bind.
+Samba's human write access is separate from Immich's explicitly writable Bilder og Video bind.
 
 ============================================================
 13. CHECK GIT / DOCUMENTATION
