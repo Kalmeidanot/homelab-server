@@ -12,13 +12,15 @@ Server hostname: homelab
 Linux admin user: kaian
 Current observed home/LAN IPv4: 10.0.0.6
 Current Tailscale IPv4: 100.83.35.13
+Current Tailscale DNS name: homelab.geep-krait.ts.net
 Primary storage mount: /srv/storage
 Windows Samba share: \\10.0.0.6\Media
 Windows personal archive share: \\homelab\Archive (fallback \\10.0.0.6\Archive)
 Cockpit home URL: https://10.0.0.6:9090
 Jellyfin home URL: http://10.0.0.6:8096
 Jellyfin private Tailscale/off-site URL: http://100.83.35.13:8096
-Jellyfin public HTTPS Funnel URL: https://homelab.tail328fad.ts.net/
+Jellyfin expected public Funnel URL: https://homelab.geep-krait.ts.net/
+Post-rename HTTPS/TV validation pending; Funnel status still lists the prior name.
 Immich home URL: http://10.0.0.6:2283
 Immich Tailscale/off-site URL: http://100.83.35.13:2283
 
@@ -64,14 +66,16 @@ http://100.83.35.13:8096
 
 Open on a device connected to the same private Tailscale network.
 
-Jellyfin publicly through Tailscale Funnel:
-https://homelab.tail328fad.ts.net/
+Jellyfin public Tailscale Funnel hostname (post-rename validation pending):
+https://homelab.geep-krait.ts.net/
 
-Use this server address in a remote Jellyfin app without requiring client-side
-Tailscale. CLI configuration succeeded on 2026-09-12; public HTTPS TV login and
-playback have NOT yet been validated. The remote TV has a Jellyfin app but has
-not yet been tested. Use strong unique Jellyfin account passwords: this address
-exposes the Jellyfin login surface to the Internet.
+This is the expected address for a remote Jellyfin app without client-side
+Tailscale. After the 2026-09-12 DNS rename, the DNS check confirms the new name
+but Funnel status still lists the prior hostname. The admin console initially
+showed "No certificate found". New-hostname certificate issuance, public HTTPS
+reachability, TV login and playback have NOT yet been validated. The remote TV
+has a Jellyfin app but has not yet been tested. Use strong unique Jellyfin
+account passwords because public Funnel access exposes the login surface.
 
 Immich at home:
 http://10.0.0.6:2283
@@ -116,12 +120,16 @@ Private Jellyfin access at http://100.83.35.13:8096 has been successfully tested
 over mobile data with authentication and playback. This private path requires
 a client connected to the same Tailscale network and remains available.
 
-Public Jellyfin access is configured at https://homelab.tail328fad.ts.net/.
-Funnel proxies HTTPS to http://127.0.0.1:8096 and was started persistently in the
-background using "sudo tailscale funnel --bg 8096" after user web approval.
-TVs can use this public address without running Tailscale; public HTTPS TV
-authentication/playback is pending validation. Arbitrary-TV playback is not
-claimed validated. No router configuration or port forwarding was changed.
+Expected public Jellyfin URL after the tailnet DNS rename on 2026-09-12:
+https://homelab.geep-krait.ts.net/
+Funnel was started persistently in the background before the rename using
+"sudo tailscale funnel --bg 8096" after user web approval. The post-rename DNS
+check reports homelab.geep-krait.ts.net., but Funnel status still lists the
+pre-rename hostname as "Funnel on" with proxy target http://127.0.0.1:8096.
+New-hostname certificate issuance, public HTTPS reachability and external
+Jellyfin/TV authentication and playback remain pending validation. The admin
+console showed "No certificate found" immediately after the rename. No router
+configuration or port forwarding was changed.
 Only Jellyfin is exposed through Funnel; Immich, Cockpit, SSH, Samba and other
 services remain outside Funnel.
 
@@ -129,7 +137,12 @@ Safe inspection (run on the server):
 
 tailscale funnel status
 
-Check for the public HTTPS address and proxy target http://127.0.0.1:8096.
+Compare the reported hostname with homelab.geep-krait.ts.net and check the local
+proxy target http://127.0.0.1:8096. The 2026-09-12 post-rename check still listed
+the prior hostname; status alone does not prove certificate issuance or playback.
+See changes/2026-09-12-rename-tailscale-tailnet-dns.md for the exact output.
+Do not request certificates or reconfigure Funnel merely to make a status check
+pass. A configuration repair requires a separate authorized task.
 
 Rollback only when intentionally disabling public Jellyfin access:
 
@@ -546,8 +559,8 @@ http://10.0.0.6:8096
 Jellyfin remotely through private Tailscale:
 http://100.83.35.13:8096
 
-Jellyfin publicly through Tailscale Funnel (TV login/playback pending validation):
-https://homelab.tail328fad.ts.net/
+Jellyfin public Funnel hostname (post-rename HTTPS/TV validation pending):
+https://homelab.geep-krait.ts.net/
 
 Immich at home:
 http://10.0.0.6:2283

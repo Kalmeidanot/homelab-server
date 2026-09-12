@@ -80,19 +80,29 @@ Currently installed/configured:
 - Tailscale hostname: homelab
 - Tailscale IPv4: 100.83.35.13
 - Normal home-LAN IPv4 remains 10.0.0.6
-- Tailscale DNS name: homelab.tail328fad.ts.net
+- Tailscale DNS name: homelab.geep-krait.ts.net; the tailnet DNS suffix was
+  renamed by the user on 2026-09-12. Read-only `Self.DNSName` reports
+  `homelab.geep-krait.ts.net.`; the machine name remains homelab
 - Tailscale remains the private remote-access path for administration and Immich;
   Jellyfin also has intentional public HTTPS access through Tailscale Funnel
 - No exit node, subnet router, or Tailscale SSH is enabled
 - LAN Jellyfin access: http://10.0.0.6:8096
 - Private Tailscale Jellyfin access remains http://100.83.35.13:8096;
   off-site authentication and video playback over this private path are validated
-- Public Tailscale Funnel Jellyfin access: https://homelab.tail328fad.ts.net/
-  proxies HTTPS to http://127.0.0.1:8096
+- Expected public Tailscale Funnel Jellyfin URL after the rename:
+  https://homelab.geep-krait.ts.net/; local proxy target remains
+  http://127.0.0.1:8096
 - On 2026-09-12, the user enabled Funnel with `sudo tailscale funnel --bg 8096`
   and approved the Tailscale web flow; the CLI confirmed successful configuration
-  and background operation. Public HTTPS TV authentication/playback remains
-  pending validation; the remote TV has a Jellyfin app but has not yet been tested
+  and background operation before the DNS rename
+- Post-rename read-only `tailscale funnel status` still lists the pre-rename
+  hostname as `Funnel on`, with the same local proxy target. It does not confirm
+  Funnel serving the new hostname. The admin console showed `No certificate
+  found` immediately after the rename; new-hostname certificate issuance, public
+  HTTPS reachability, TV authentication and playback remain unvalidated. The
+  remote TV has a Jellyfin app but has not yet been tested
+- Exact status evidence and troubleshooting:
+  changes/2026-09-12-rename-tailscale-tailnet-dns.md
 - Only Jellyfin is exposed through Funnel; Immich, Cockpit, SSH, Samba and other
   services are not exposed through Funnel. Jellyfin accounts should use strong
   unique passwords because the public endpoint exposes the login surface
