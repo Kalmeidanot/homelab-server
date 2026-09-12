@@ -86,29 +86,46 @@ Containers should receive only the access they require; Jellyfin mounts
 - Docker Engine / Docker Compose: installed and operational
 - Samba: installed and operational
 - Jellyfin: deployed with Docker Compose and host networking
-- Tailscale: installed and operational for private remote access
+- Tailscale: private remote access plus public HTTPS Funnel access to Jellyfin
 - Immich: deployed with Docker Compose
 
 ## Remote access
 
-Tailscale is the current safe/default method for remote Jellyfin and Immich
-access. The server participates as `homelab` with Tailscale IPv4 100.83.35.13
-while retaining its normal home-LAN IPv4 10.0.0.6. Jellyfin is reachable by
-authenticated devices on the same tailnet at http://100.83.35.13:8096.
-Immich is reachable by authenticated devices on the same tailnet at
-http://100.83.35.13:2283.
+Tailscale remains the private remote-access path for administration and Immich.
+The server participates as `homelab` with Tailscale IPv4 100.83.35.13 and DNS name
+homelab.tail328fad.ts.net, while retaining its home-LAN IPv4 10.0.0.6.
 
-The server is not configured as a Tailscale exit node or subnet router. Tailscale
-SSH and Funnel are not enabled, and Jellyfin port 8096 has not intentionally been
-published through router port forwarding. Immich port 2283 likewise has not been
-intentionally exposed directly to the public Internet.
+Jellyfin has three access paths:
 
-### Low-priority backlog: Universal Jellyfin remote access
+- LAN: http://10.0.0.6:8096
+- Private Tailscale: http://100.83.35.13:8096 for devices on the same tailnet;
+  off-site authentication and playback have been validated through this path
+- Public Tailscale Funnel: https://homelab.tail328fad.ts.net/ proxies HTTPS to
+  http://127.0.0.1:8096, providing a public address for Jellyfin clients, including
+  TVs that cannot run Tailscale
 
-Investigate later how to securely access Jellyfin from arbitrary TVs/devices that
-cannot run Tailscale, preferably through a normal HTTPS hostname. Compare reverse
-proxy, domain, and TLS approaches and their security implications. Tailscale
-remains the current safe/default remote-access method.
+The user enabled persistent/background Funnel access on 2026-09-12 with
+`sudo tailscale funnel --bg 8096` and approved Funnel through Tailscale's web flow.
+The CLI confirmed successful configuration and background operation. Public
+HTTPS TV authentication/playback remains pending validation; the remote TV has
+a Jellyfin app, but has not yet been tested. Compatibility and playback on
+arbitrary TVs are therefore not established.
+
+Only Jellyfin is intentionally public through Funnel. Its Internet-facing login
+surface means Jellyfin accounts should use strong unique passwords. Immich
+remains private, reachable remotely only on the tailnet at
+http://100.83.35.13:2283; it is not exposed through Funnel. Cockpit, SSH, Samba
+and other services are not exposed through Funnel either.
+
+Router port forwarding is still not used for Jellyfin or Immich; port 8096 was
+not directly exposed and no router configuration changed. The server is not a
+Tailscale exit node or subnet router, and Tailscale SSH remains disabled.
+Jellyfin Docker Compose, media, libraries, accounts and configuration were not
+changed to enable this access.
+
+A custom domain/reverse proxy may still be evaluated later if desired, but is
+not required for the current public Jellyfin access. See
+changes/2026-09-12-enable-jellyfin-tailscale-funnel.md for validation and rollback.
 
 ## Jellyfin
 

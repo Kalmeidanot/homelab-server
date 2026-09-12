@@ -1,6 +1,6 @@
 # Current State
 
-Last updated: 2026-09-11
+Last updated: 2026-09-12
 
 ## Host
 
@@ -80,14 +80,27 @@ Currently installed/configured:
 - Tailscale hostname: homelab
 - Tailscale IPv4: 100.83.35.13
 - Normal home-LAN IPv4 remains 10.0.0.6
-- Tailscale is used for private remote access only
-- No exit node, subnet router, Tailscale SSH, or Funnel/public exposure is enabled
-- Router port forwarding has not intentionally exposed Jellyfin port 8096 publicly
-- Off-site Jellyfin access over Tailscale is validated at
-  http://100.83.35.13:8096: authentication and video playback both succeeded
+- Tailscale DNS name: homelab.tail328fad.ts.net
+- Tailscale remains the private remote-access path for administration and Immich;
+  Jellyfin also has intentional public HTTPS access through Tailscale Funnel
+- No exit node, subnet router, or Tailscale SSH is enabled
+- LAN Jellyfin access: http://10.0.0.6:8096
+- Private Tailscale Jellyfin access remains http://100.83.35.13:8096;
+  off-site authentication and video playback over this private path are validated
+- Public Tailscale Funnel Jellyfin access: https://homelab.tail328fad.ts.net/
+  proxies HTTPS to http://127.0.0.1:8096
+- On 2026-09-12, the user enabled Funnel with `sudo tailscale funnel --bg 8096`
+  and approved the Tailscale web flow; the CLI confirmed successful configuration
+  and background operation. Public HTTPS TV authentication/playback remains
+  pending validation; the remote TV has a Jellyfin app but has not yet been tested
+- Only Jellyfin is exposed through Funnel; Immich, Cockpit, SSH, Samba and other
+  services are not exposed through Funnel. Jellyfin accounts should use strong
+  unique passwords because the public endpoint exposes the login surface
+- Jellyfin port 8096 was not directly exposed with router port forwarding;
+  no router configuration was changed
 - Off-site Immich access over Tailscale is validated at
-  http://100.83.35.13:2283; port 2283 is not intentionally exposed directly
-  to the public Internet
+  http://100.83.35.13:2283; Immich remains private, with remote access through
+  Tailscale only, and is not exposed through Funnel or direct port forwarding
 
 ## Operational Reference
 

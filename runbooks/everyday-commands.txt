@@ -17,7 +17,8 @@ Windows Samba share: \\10.0.0.6\Media
 Windows personal archive share: \\homelab\Archive (fallback \\10.0.0.6\Archive)
 Cockpit home URL: https://10.0.0.6:9090
 Jellyfin home URL: http://10.0.0.6:8096
-Jellyfin Tailscale/off-site URL: http://100.83.35.13:8096
+Jellyfin private Tailscale/off-site URL: http://100.83.35.13:8096
+Jellyfin public HTTPS Funnel URL: https://homelab.tail328fad.ts.net/
 Immich home URL: http://10.0.0.6:2283
 Immich Tailscale/off-site URL: http://100.83.35.13:2283
 
@@ -58,10 +59,19 @@ http://10.0.0.6:8096
 
 Open in a web browser or Jellyfin client on the home network.
 
-Jellyfin remotely through Tailscale:
+Jellyfin remotely through private Tailscale:
 http://100.83.35.13:8096
 
 Open on a device connected to the same private Tailscale network.
+
+Jellyfin publicly through Tailscale Funnel:
+https://homelab.tail328fad.ts.net/
+
+Use this server address in a remote Jellyfin app without requiring client-side
+Tailscale. CLI configuration succeeded on 2026-09-12; public HTTPS TV login and
+playback have NOT yet been validated. The remote TV has a Jellyfin app but has
+not yet been tested. Use strong unique Jellyfin account passwords: this address
+exposes the Jellyfin login surface to the Internet.
 
 Immich at home:
 http://10.0.0.6:2283
@@ -71,8 +81,8 @@ Open in a web browser or Immich client on the home network.
 Immich remotely through Tailscale:
 http://100.83.35.13:2283
 
-Open on a device connected to the same private Tailscale network. Immich is not
-intentionally exposed directly to the public Internet.
+Open on a device connected to the same private Tailscale network. Immich remains
+private and is not exposed through Funnel or direct router port forwarding.
 
 Windows Samba share:
 \\10.0.0.6\Media
@@ -102,11 +112,33 @@ Expected output: active
 Tailscale is configured to start automatically. Normally, do NOT run
 "sudo tailscale up" again.
 
-Remote Jellyfin access has been successfully tested over mobile data. The client
-device must normally be connected to the same Tailscale network. A random TV
-outside the house cannot currently use the Tailscale address unless that TV or
-device also supports Tailscale. Universal Jellyfin access from arbitrary TVs and
-devices is a future backlog item.
+Private Jellyfin access at http://100.83.35.13:8096 has been successfully tested
+over mobile data with authentication and playback. This private path requires
+a client connected to the same Tailscale network and remains available.
+
+Public Jellyfin access is configured at https://homelab.tail328fad.ts.net/.
+Funnel proxies HTTPS to http://127.0.0.1:8096 and was started persistently in the
+background using "sudo tailscale funnel --bg 8096" after user web approval.
+TVs can use this public address without running Tailscale; public HTTPS TV
+authentication/playback is pending validation. Arbitrary-TV playback is not
+claimed validated. No router configuration or port forwarding was changed.
+Only Jellyfin is exposed through Funnel; Immich, Cockpit, SSH, Samba and other
+services remain outside Funnel.
+
+Safe inspection (run on the server):
+
+tailscale funnel status
+
+Check for the public HTTPS address and proxy target http://127.0.0.1:8096.
+
+Rollback only when intentionally disabling public Jellyfin access:
+
+sudo tailscale funnel --https=443 off
+
+Disables this Funnel endpoint; it does not disable normal private Tailscale
+access. Recheck "tailscale funnel status" and verify Jellyfin remains reachable
+on the LAN and through the private Tailscale address. Do not stop tailscaled or
+change Docker/router settings to disable Funnel.
 
 ============================================================
 4. BASIC LINUX NAVIGATION
@@ -493,6 +525,9 @@ Normally, you do NOT manually start these after a normal reboot:
 - Immich
 - Tailscale
 
+Jellyfin Funnel was configured persistently in background mode (--bg); normally
+no manual start is needed. Funnel recovery after reboot has not yet been tested.
+
 Normal startup:
 1. Power on the Lenovo.
 2. Wait roughly 1-2 minutes.
@@ -508,8 +543,11 @@ https://10.0.0.6:9090
 Jellyfin at home:
 http://10.0.0.6:8096
 
-Jellyfin remotely through Tailscale:
+Jellyfin remotely through private Tailscale:
 http://100.83.35.13:8096
+
+Jellyfin publicly through Tailscale Funnel (TV login/playback pending validation):
+https://homelab.tail328fad.ts.net/
 
 Immich at home:
 http://10.0.0.6:2283

@@ -44,5 +44,11 @@ Ethernet is intended to be the normal connection for the server.
 - IPv4 address: 100.83.35.13
 - `tailscaled` is enabled and active
 - Installed from Tailscale's official Ubuntu 26.04 Resolute repository
-- No exit-node, subnet-router, Tailscale SSH, or Funnel configuration is enabled
+- No exit-node, subnet-router, or Tailscale SSH configuration is enabled
+- Funnel enabled for Jellyfin only on 2026-09-12:
+  https://homelab.tail328fad.ts.net/ -> http://127.0.0.1:8096
+- CLI configuration/background operation confirmed; public HTTPS TV
+  authentication/playback remains pending validation
+- Private Tailscale access remains available; Immich and administration services
+  are not exposed through Funnel. No router port forwarding was added
 - The normal home-LAN IPv4 remains 10.0.0.6
