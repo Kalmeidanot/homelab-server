@@ -50,13 +50,20 @@ Ethernet is intended to be the normal connection for the server.
 - Installed from Tailscale's official Ubuntu 26.04 Resolute repository
 - No exit-node, subnet-router, or Tailscale SSH configuration is enabled
 - Funnel enabled for Jellyfin only on 2026-09-12, before the DNS rename
-- Expected post-rename public URL: https://homelab.geep-krait.ts.net/
-- Read-only Funnel status still lists the pre-rename hostname as `Funnel on`;
-  local proxy target remains http://127.0.0.1:8096
-- Admin console showed `No certificate found` immediately after the rename;
-  new-hostname certificate issuance, public HTTPS reachability and external TV
-  authentication/playback remain unvalidated
-- Exact evidence: changes/2026-09-12-rename-tailscale-tailnet-dns.md
+- Public Jellyfin URL: https://homelab.geep-krait.ts.net (no :8096)
+- User-supplied validation recorded on 2026-09-13: new DNS/Funnel hostname works;
+  `curl -I https://homelab.geep-krait.ts.net` returned `HTTP/2 302`,
+  `location: web/` and `server: Kestrel`, confirming public DNS resolution,
+  TLS/HTTPS and Jellyfin response through Funnel
+- An off-site TV's Jellyfin app successfully connected using this URL; the TV
+  does not have Tailscale installed. Video playback through this new public
+  Funnel path remains unverified
+- After the user reran `sudo tailscale funnel --bg 8096`, Funnel status showed
+  both homelab.geep-krait.ts.net and homelab.tail328fad.ts.net as `Funnel on`;
+  both use local proxy target http://127.0.0.1:8096. The old hostname remains a
+  known stale/legacy entry pending separate deliberate runtime cleanup
+- Current evidence: changes/2026-09-13-validate-jellyfin-funnel-after-dns-rename.md;
+  the 2026-09-12 rename record preserves the previous pending state
 - Private Tailscale access remains available; Immich and administration services
   are not exposed through Funnel. No router port forwarding was added
 - The normal home-LAN IPv4 remains 10.0.0.6

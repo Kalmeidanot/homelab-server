@@ -103,20 +103,31 @@ Jellyfin has three access paths:
 - LAN: http://10.0.0.6:8096
 - Private Tailscale: http://100.83.35.13:8096 for devices on the same tailnet;
   off-site authentication and playback have been validated through this path
-- Public Tailscale Funnel: expected post-rename URL
-  https://homelab.geep-krait.ts.net/, with unchanged local proxy target
-  http://127.0.0.1:8096, intended for Jellyfin clients including TVs that cannot
-  run Tailscale; new-hostname HTTPS and playback validation remain pending
+- Public Tailscale Funnel: https://homelab.geep-krait.ts.net, with unchanged
+  local proxy target http://127.0.0.1:8096. Do not add :8096 to the public URL.
+  HTTPS and an off-site TV Jellyfin client connection without Tailscale installed
+  on the TV are validated; video playback through this new public path is unverified
 
 The user enabled persistent/background Funnel access on 2026-09-12 with
 `sudo tailscale funnel --bg 8096` and approved Funnel through Tailscale's web flow.
 The CLI confirmed successful configuration and background operation before the
-DNS rename. After the rename, the read-only DNS check reports the new name, but
-`tailscale funnel status` still lists the pre-rename hostname as `Funnel on` and
-the unchanged proxy target. The admin console showed `No certificate found`
-immediately after the rename. New-hostname certificate issuance, public HTTPS
-reachability, authentication and playback are unvalidated. The remote TV has a
-Jellyfin app, but has not yet been tested; arbitrary-TV playback is not established.
+DNS rename. Immediately after the rename, Funnel status still listed only the
+pre-rename hostname and the admin console showed `No certificate found`.
+Those historical observations are preserved in the rename record.
+
+The user subsequently reran `sudo tailscale funnel --bg 8096`; Tailscale reported
+the new hostname and successful background operation. Validation recorded on
+2026-09-13 confirms `curl -I https://homelab.geep-krait.ts.net` returned
+`HTTP/2 302`, `location: web/` and `server: Kestrel`, demonstrating working public
+DNS resolution, TLS/HTTPS and Funnel access to Jellyfin. An off-site TV without
+Tailscale installed successfully connected through its Jellyfin app using this
+URL. This demonstrates access without joining the tailnet at the client-connection
+level; it does not establish video playback or compatibility with every TV.
+
+User-reported Funnel status shows both homelab.geep-krait.ts.net and the old
+homelab.tail328fad.ts.net as `Funnel on`, each proxying to http://127.0.0.1:8096.
+The old hostname is a known stale/legacy entry pending separate deliberate
+runtime cleanup; its presence in status does not establish that the old URL works.
 
 Only Jellyfin is intentionally public through Funnel. Its Internet-facing login
 surface means Jellyfin accounts should use strong unique passwords. Immich
@@ -134,8 +145,10 @@ A custom domain/reverse proxy may still be evaluated later if desired, but is
 not required for the current public Jellyfin access. See
 changes/2026-09-12-enable-jellyfin-tailscale-funnel.md for validation and rollback.
 That record retains the original hostname as history. See
-changes/2026-09-12-rename-tailscale-tailnet-dns.md for the post-rename status
-mismatch and pending validation.
+changes/2026-09-12-rename-tailscale-tailnet-dns.md for the historical post-rename status
+mismatch and pending validation at that time. See
+changes/2026-09-13-validate-jellyfin-funnel-after-dns-rename.md for the successful
+HTTPS and TV-client connection validation and remaining legacy-entry cleanup.
 
 ## Jellyfin
 

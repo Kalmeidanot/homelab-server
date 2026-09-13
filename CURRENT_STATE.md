@@ -1,6 +1,6 @@
 # Current State
 
-Last updated: 2026-09-12
+Last updated: 2026-09-13
 
 ## Host
 
@@ -89,20 +89,26 @@ Currently installed/configured:
 - LAN Jellyfin access: http://10.0.0.6:8096
 - Private Tailscale Jellyfin access remains http://100.83.35.13:8096;
   off-site authentication and video playback over this private path are validated
-- Expected public Tailscale Funnel Jellyfin URL after the rename:
-  https://homelab.geep-krait.ts.net/; local proxy target remains
-  http://127.0.0.1:8096
+- Public Tailscale Funnel Jellyfin URL: https://homelab.geep-krait.ts.net;
+  no :8096 is required. Local proxy target remains http://127.0.0.1:8096
 - On 2026-09-12, the user enabled Funnel with `sudo tailscale funnel --bg 8096`
-  and approved the Tailscale web flow; the CLI confirmed successful configuration
-  and background operation before the DNS rename
-- Post-rename read-only `tailscale funnel status` still lists the pre-rename
-  hostname as `Funnel on`, with the same local proxy target. It does not confirm
-  Funnel serving the new hostname. The admin console showed `No certificate
-  found` immediately after the rename; new-hostname certificate issuance, public
-  HTTPS reachability, TV authentication and playback remain unvalidated. The
-  remote TV has a Jellyfin app but has not yet been tested
-- Exact status evidence and troubleshooting:
-  changes/2026-09-12-rename-tailscale-tailnet-dns.md
+  and approved the Tailscale web flow before the DNS rename. After the rename,
+  the user reran the command; the CLI reported the new public hostname and
+  successful background operation
+- Validation recorded on 2026-09-13 from user-supplied evidence:
+  `curl -I https://homelab.geep-krait.ts.net` returned `HTTP/2 302`,
+  `location: web/` and `server: Kestrel`. Public DNS resolution, TLS/HTTPS,
+  Funnel reachability and Jellyfin response through the new hostname work
+- An off-site TV's Jellyfin app successfully connected using the new public
+  URL. The TV does not have Tailscale installed. Video playback through this
+  new public Funnel path remains unverified
+- Funnel status now shows both homelab.geep-krait.ts.net and
+  homelab.tail328fad.ts.net as `Funnel on`, proxying to http://127.0.0.1:8096.
+  The old hostname is a known stale/legacy entry pending a separate deliberate
+  runtime cleanup task; it has not been removed
+- Current validation evidence:
+  changes/2026-09-13-validate-jellyfin-funnel-after-dns-rename.md.
+  The 2026-09-12 rename record preserves the earlier pending state
 - Only Jellyfin is exposed through Funnel; Immich, Cockpit, SSH, Samba and other
   services are not exposed through Funnel. Jellyfin accounts should use strong
   unique passwords because the public endpoint exposes the login surface
