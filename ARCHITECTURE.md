@@ -163,6 +163,18 @@ transcode have been successfully validated. This confirms the hardware path for
 that tested scenario; it does not establish that every codec or tone-mapping
 scenario has been tested.
 
+### Optional Jellyfin plugin: SmartLists
+
+SmartLists 12.0.1.0 is a third-party Jellyfin-layer enhancement for dynamic,
+rule-based collections and playlists, including external lists. The user installed
+it manually; read-only validation confirmed it loaded on Jellyfin 10.11.11.
+It works with Jellyfin library/database objects and is not a core storage
+dependency. It does not change the physical media storage architecture:
+/srv/storage/media remains mounted read-only at /media. Uninstalling SmartLists
+should not require moving, deleting or reorganizing media files. Any removal of
+its configuration or generated collections/playlists requires separate review.
+See changes/2026-09-13-install-jellyfin-smartlists.md for evidence and removal scope.
+
 ## Immich
 
 Immich v3.1.0 runs as a Docker Compose stack from compose/immich. The application

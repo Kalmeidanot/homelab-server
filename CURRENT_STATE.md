@@ -174,7 +174,7 @@ Currently installed/configured:
 
 ## Jellyfin
 
-- Running server/API version verified on 2026-09-07: 10.11.11
+- Running server/API version verified read-only on 2026-09-13: 10.11.11
 - Compose definition: ~/nas-admin/compose/jellyfin/compose.yaml
 - Image: jellyfin/jellyfin:latest
 - Container: jellyfin
@@ -212,6 +212,25 @@ Currently installed/configured:
   transcoding; the Jellyfin FFmpeg log confirmed VA-API initialization, QSV device
   derivation and use of the h264_qsv encoder
 - Other codec and tone-mapping transcoding scenarios have not been individually validated
+- SmartLists 12.0.1.0 is installed as an optional third-party Jellyfin plugin,
+  manually installed by the user through Jellyfin's plugin UI after adding its
+  repository. Codex verified plugin presence and successful startup/load read-only
+  on 2026-09-13; metadata reports Active and target ABI 10.11.0
+- SmartLists project: https://github.com/jyourstone/jellyfin-smartlists-plugin
+- Repository manifest:
+  https://raw.githubusercontent.com/jyourstone/jellyfin-plugin-manifest/main/manifest.json
+- Purpose: dynamic/rule-based Jellyfin collections and playlists, including
+  external-list integration. No particular external provider has been tested
+  as part of this validation
+- Plugin directory: /srv/jellyfin/config/plugins/SmartLists_12.0.1.0
+- No SmartLists were created or configured, and no collections or playlists were
+  created by Codex in this documentation task. The observed startup auto-refresh
+  cache contained 0 playlists and 0 collections; this is a startup observation,
+  not a comprehensive audit of current Jellyfin objects
+- Jellyfin health returned Healthy. No SmartLists compatibility/startup errors
+  were found in the latest startup log inspected; optional Plugin Pages is absent.
+  Startup warnings and validation scope are recorded in
+  changes/2026-09-13-install-jellyfin-smartlists.md
 
 ## Immich
 
