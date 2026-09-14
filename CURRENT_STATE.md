@@ -1,6 +1,6 @@
 # Current State
 
-Last updated: 2026-09-13
+Last updated: 2026-09-14
 
 ## Host
 
@@ -58,12 +58,22 @@ Currently installed/configured:
 
 ## Ubuntu Maintenance
 
-- The 2026-09-04 maintenance pass completed successfully, including Docker/containerd
-  and Ubuntu kernel/security package updates.
-- The server is currently booted into Linux 7.0.0-31-generic.
-- Three updates remain deferred by Ubuntu phased updates: libaudit-common, libaudit1,
-  and libflashrom1. They were not forced and should roll out normally.
-- The separate available firmware update has not been performed.
+- The 2026-09-14 Ubuntu maintenance pass completed successfully, based on
+  user-confirmed results. The upgrade simulation showed 9 packages upgrading,
+  0 installing, 0 removing, and 0 held back; the real upgrade succeeded.
+- Updated packages: containerd.io, dmidecode, docker-buildx-plugin, libaudit-common,
+  libaudit1, libflashrom1, mdadm, sos, and tailscale. This includes the three
+  packages previously deferred by phased updates on 2026-09-04.
+- A reboot was required due to libc6 and completed successfully. The kernel
+  remained Linux 7.0.0-31-generic and LAN IPv4 remained 10.0.0.6.
+- After reboot, SSH returned; ssh, cockpit.socket, smbd, docker, containerd, and
+  tailscaled were active. /srv/storage was mounted read/write from /dev/sda1 as
+  ext4. Jellyfin and all four Immich containers were running and healthy.
+- The final reboot-required check returned `NO REBOOT REQUIRED`.
+- apt reported grub-pc-bin as automatically installed and no longer required;
+  `apt autoremove` was NOT run and grub-pc-bin was not removed in this pass.
+- The separate firmware update remains pending and was NOT performed.
+- Detailed record: changes/2026-09-14-ubuntu-maintenance-update.md.
 
 ### Known Cockpit Software Updates issue
 
