@@ -2,6 +2,8 @@
 
 Recorded: 2026-08-31
 
+Firmware status updated: 2026-09-15 (user-supplied recovery evidence).
+
 ## Computer
 
 - Manufacturer: Lenovo
@@ -30,5 +32,10 @@ Recorded: 2026-08-31
 ## Firmware
 
 - BIOS/UEFI: M43KT2FA
+- System Firmware: 0.1.47; unchanged after the failed Lenovo 0.1.52 update attempt
 - Firmware date: 2025-03-27
 - Boot mode: UEFI
+- 0.1.52 remains available; retry is deferred pending separate review of
+  vendor-supported alternatives to the same fwupd/LVFS capsule path.
+- Incident and successful server recovery:
+  [failed firmware update](../changes/2026-09-15-failed-lenovo-firmware-update.md).

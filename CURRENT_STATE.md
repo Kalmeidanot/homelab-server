@@ -1,6 +1,6 @@
 # Current State
 
-Last updated: 2026-09-14
+Last updated: 2026-09-15
 
 ## Host
 
@@ -72,7 +72,8 @@ Currently installed/configured:
 - The final reboot-required check returned `NO REBOOT REQUIRED`.
 - apt reported grub-pc-bin as automatically installed and no longer required;
   `apt autoremove` was NOT run and grub-pc-bin was not removed in this pass.
-- The separate firmware update remains pending and was NOT performed.
+- Firmware was not attempted during that Ubuntu maintenance pass; the separate
+  failed firmware attempt and recovery are recorded below.
 - Detailed record: changes/2026-09-14-ubuntu-maintenance-update.md.
 
 ### Known Cockpit Software Updates issue
@@ -84,6 +85,22 @@ Currently installed/configured:
   behavior on Ubuntu Server. Do not change working server networking solely to fix
   this cosmetic/update-UI issue.
 - apt is the authoritative update method until this low-priority issue is revisited.
+
+## Firmware
+
+- The Lenovo 0.1.52 fwupd/LVFS update attempt FAILED. System Firmware remains
+  0.1.47 / BIOS M43KT2FA; 0.1.52 remains available and future updating is pending.
+- The attempt caused an extended no-display/no-network boot stall. The server
+  recovered after one normal power-button press/restart and is operational,
+  based on user-confirmed SSH, Jellyfin, Immich, Samba and disk activity.
+- Local console login is not required for SSH or normal server services.
+- fwupd retains stale/conflicting reboot/history messages alongside explicit
+  failure. These do not establish an active flash or a need for another reboot.
+- Do not retry the same fwupd/LVFS capsule path without separate review. Future
+  firmware work is a separate deliberate maintenance task, first evaluating
+  Lenovo's alternate vendor-supported update/recovery methods. The firmware
+  issue remains unresolved.
+- Detailed evidence: [failed update and recovery](changes/2026-09-15-failed-lenovo-firmware-update.md).
 
 ## Remote Access
 

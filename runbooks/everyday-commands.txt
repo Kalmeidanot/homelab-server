@@ -504,6 +504,12 @@ behavior. It is a low-priority backlog item.
 Ubuntu phased updates may remain listed after a successful upgrade. Do not force
 them merely to make the list empty; allow them to roll out normally.
 
+Firmware maintenance is separate: the Lenovo 0.1.52 fwupd/LVFS attempt failed.
+Do not retry the same capsule path or reboot solely because of its stale fwupd
+reboot/history messages. Future firmware work requires separate deliberate review,
+including Lenovo's alternate vendor-supported update/recovery methods.
+See changes/2026-09-15-failed-lenovo-firmware-update.md.
+
 ============================================================
 17. GENERAL SYSTEMD SERVICE STATUS
 ============================================================
@@ -547,6 +553,9 @@ Normal startup:
 1. Power on the Lenovo.
 2. Wait roughly 1-2 minutes.
 3. Use SSH, Cockpit, or Jellyfin normally.
+
+Local console login is not required for SSH or normal server services. After the
+failed firmware attempt, logout/reconnect testing confirmed this behavior.
 
 SSH from Windows Terminal or PowerShell:
 
