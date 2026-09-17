@@ -338,21 +338,39 @@ Currently installed/configured:
 
 ## PokemonReleaseMonitor
 
-- Application installed at /home/kaian/apps/PokemonReleaseMonitor from main,
-  commit e5d1b98af8ae3d65d67c238f45817b8999537d6f; source worktree unchanged.
-- Node v24.21.0 / npm 11.19.0 installed under ~/.local/opt; node/npm/npx
-  symlinks under ~/.local/bin. npm ci, lint, typecheck, 56 tests and build pass.
+- Application: /home/kaian/apps/PokemonReleaseMonitor, clean main at
+  e3df485f8fb77221cb4f4b916646a188e138c5fb; feature/main pushed to verified origin.
+- Node v24.21.0 / npm 11.19.0 under ~/.local/opt; node/npm/npx symlinks under
+  ~/.local/bin. npm ci, lint, typecheck, 117 fixture tests and build passed.
+- Notification-only monitoring of Pokemon TCG: 30th Celebration. 60 stores
+  researched, 27 enabled and 33 deferred; full list and reasons in app docs/STORES.md.
+  Priority stores Cardcenter, Outland, Pokestore, Collectible and Ringo enabled;
+  ARK, Norli and Extra Leker await reliable discovery/online-stock parsing.
+- Production snapshot: 123 relevant products; Cardcenter 22 preserved. IndigoTCG
+  reports two available products (placeholder prices/unspecified language),
+  LittleM six and Kortbakeren seven open preorders. Initial per-store baselines
+  are silent; zero product notifications at post-deployment verification.
+- Polling targets 90 +/- 15 seconds between starts per store, staggered across
+  stores, maximum three concurrent jobs with sequential HTTP inside each job.
+  Errors/backoff are isolated per store. No browser or purchasing functionality.
 - Runtime: /home/kaian/.local/share/pokemon-release-monitor (700 kaian:kaian),
-  with state.sqlite, last-poll.json and logs/monitor.log (600).
-- First Cardcenter poll: 2,631 listings, 22 relevant products (all sold_out),
-  14 language-blocked candidates; silent baseline, zero queued notifications.
-- Environment: /home/kaian/.config/pokemon-release-monitor/env, 600 kaian:kaian,
-  with both Pushover keys confirmed non-empty. No secrets in Git.
-- Real homelab Pushover test accepted: HTTP 200 / API status 1.
-- pokemon-release-monitor.service installed, enabled and active as kaian; first
-  started 2026-09-17 21:31:37 CEST. Uses absolute Node path, built CLI, private umask,
-  restart-on-failure and network-online.target. Consecutive polls and clean
-  stop/start/restart verified; baseline preserved and no duplicate notifications.
-  Autostart configuration verified; no reboot performed.
-- Production app status: /home/kaian/.local/bin/pokemon-monitor.
-- Record: changes/2026-09-17-pokemon-release-monitor-deployment.md.
+  SQLite schema 2, per-store last-poll snapshots and logs/monitor.log (600).
+  Transactional migration preserved original Cardcenter records/history/baseline;
+  integrity and foreign-key checks passed. Fresh pre-migration backup:
+  backups/pre-multistore-deploy-20260917T203625Z.sqlite under runtime.
+- Environment: /home/kaian/.config/pokemon-release-monitor/env, 600 kaian:kaian;
+  both Pushover keys non-empty and outside Git. Product events use priority 1;
+  normal test uses 0; emergency priority 2 is never used. Exactly one homelab
+  HIGH test accepted HTTP 200 / API status 1 / priority 1 at 20:22:35 UTC.
+  iPhone reception/presentation requires the user's own confirmation.
+- pokemon-release-monitor.service enabled and active as kaian, restarted for
+  deployment at 2026-09-17 22:36:27 CEST. Absolute Node path, built CLI,
+  private umask, restart-on-failure and network-online.target unchanged.
+  All 27 stores completed at least three successful polls; no errors, 403/429,
+  crash loop or duplicate/bootstrap pushes. NRestarts=0. No reboot performed.
+- Initial resource observation: about 301 MiB service RAM, 314 MiB peak,
+  5.3% of one CPU core average, 8.9 MiB SQLite plus WAL, 475 KiB logs.
+- Production per-store status: /home/kaian/.local/bin/pokemon-monitor.
+- Latest record, validation and schema-aware rollback:
+  changes/2026-09-17-pokemon-multistore-high-priority.md.
+  Initial installation: changes/2026-09-17-pokemon-release-monitor-deployment.md.

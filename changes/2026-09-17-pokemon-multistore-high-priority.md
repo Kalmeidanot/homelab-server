@@ -1,7 +1,7 @@
 # PokemonReleaseMonitor: multi-store and high-priority alerts
 
 Date: 2026-09-17
-Status: QA/live validation complete; production switch awaits terminal sudo.
+Status: deployed and verified in production; all 27 enabled stores completed at least three successful polls.
 
 ## Reason and boundaries
 
@@ -101,7 +101,7 @@ needed. Only the user can confirm reception/Time Sensitive presentation on iOS.
 ## Production switch
 
 Reviewed script (bash -n passed): scripts/pokemon-monitor-deploy-multistore.
-The user runs it directly as kaian because this session cannot authenticate sudo:
+The user ran it directly as kaian because this session cannot authenticate sudo:
 
 ```sh
 /home/kaian/nas-admin/scripts/pokemon-monitor-deploy-multistore
@@ -172,7 +172,44 @@ an older DB as routine troubleshooting. No rollback has been needed or executed.
 
 ## Post-deployment observation
 
-Pending terminal deployment: active/enabled status, 2-3 polls per enabled store,
-no duplicate/bootstrap notifications, resource snapshot (RAM/CPU/DB/log sizes),
-final integrity/permissions/Git checks. CURRENT_STATE and everyday runbook will
-be updated to the verified final production state after these checks.
+Deployment completed on 2026-09-17; service started at 22:36:27 CEST (20:36:27 UTC).
+Production main is the reviewed e3df485 commit. Fresh stopped-service backup:
+/home/kaian/.local/share/pokemon-release-monitor/backups/pre-multistore-deploy-20260917T203625Z.sqlite.
+Deployment receipt: runtime/deploy-multistore.json (old/new commits, backup,
+36 previous product records, zero previous notifications, original baseline).
+
+At 20:42:30 UTC, journald contained 99 successful polls across all 27 stores,
+minimum three and maximum four per store. All 26 newly enabled stores logged a
+silent baseline; Cardcenter retained 2026-09-17T19:25:52.387Z. No poll errors,
+403/429, crashes, restarts, notification attempts or duplicate/bootstrap pushes.
+All store health rows are OK without active backoff. Service active/running,
+autostart enabled, NRestarts=0. No reboot or additional test push performed.
+
+Production counts match isolated validation: Cardcenter 22, Outland 10,
+Pokestore 22, Manaheim 17, Altakube 19, Game & Trade 3, IndigoTCG 2,
+LittleM TCG 10, Maeddiiss/Kortbakeren 7, CardSailor 11; the other 17 enabled
+stores currently have zero matching products. Total 123 after language filtering.
+IndigoTCG reports two available products with placeholder/unknown prices and
+unspecified language; six LittleM and seven Kortbakeren preorders are open.
+These existing items were silently baselined, not sent as new alerts.
+
+SQLite schema=2, integrity_check=ok, foreign_key_check empty. Every one of the
+36 original Cardcenter URL/ID mappings exists after scoping (22 pass language
+filter). Original baseline and notification history preserved; notification
+rows remain zero. Runtime mode 700, DB/logs/backup/env mode 600, owner kaian.
+Runtime and credentials remain outside both repositories.
+
+Resource snapshot after about six minutes: systemd memory about 301 MiB,
+peak 314 MiB; 19.1 cumulative CPU seconds, process CPU average about 5.3% of
+one core. SQLite main file 8.9 MiB, WAL about 4.8 MiB, application logs 475 KiB.
+These are startup/observation measurements, not long-term capacity guarantees.
+No infrastructure, dependency, OS package or systemd unit changes were needed.
+The unit's old descriptive Cardcenter label remains cosmetic; the process now
+runs the 27-store registry. Operations wrapper and status work with production env.
+
+CURRENT_STATE.md and runbooks/everyday-commands.txt updated. App feature/main
+and server documentation pushed through verified origins without force. Final
+tracked-file secret-value scan passed without displaying any credentials.
+Rollback is documented above with the actual fresh backup; not needed/executed.
+Recommended next research wave: ARK/Norli/Extra Leker stock/discovery contracts,
+then Cardstore/MaxGaming and a narrower LABOGE collection source.

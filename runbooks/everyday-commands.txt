@@ -598,7 +598,7 @@ Normally, you do NOT manually start these after a normal reboot:
 - Immich
 - Tailscale
 - UFW host firewall
-- PokemonReleaseMonitor (Cardcenter notifications)
+- PokemonReleaseMonitor (27-store release notifications)
 
 Jellyfin Funnel was configured persistently in background mode (--bg); normally
 no manual start is needed. Funnel recovery after reboot has not yet been tested.
@@ -662,14 +662,9 @@ encryption keys, or Codex authentication contents into documentation or Git.
 20. POKEMON RELEASE MONITOR
 ============================================================
 
-2026-09-17: installed, active and enabled for autostart. Pushover test accepted.
-No manual start is normally needed after reboot. For deliberate reinstallation
-only, the activation script validates existing environment and tests delivery:
-
-/home/kaian/nas-admin/scripts/pokemon-monitor-activate
-
-The script asks for sudo authentication when installing the system service.
-Never send keys in chat or commit them. If any test fails, service activation stops.
+2026-09-17: 27-store monitor active and enabled for autostart.
+No manual start is normally needed after reboot. Pushover HIGH test accepted
+once; no repeat test is needed. Never send keys in chat or commit them.
 
 Normal operations:
 
@@ -682,7 +677,7 @@ journalctl -u pokemon-release-monitor -n 100 --no-pager
 Manual live logs (Ctrl+C exits):
 journalctl -u pokemon-release-monitor -f
 
-Production app status, including baseline and pending notifications:
+Production app status: per-store products, availability, last success and backoff:
 /home/kaian/.local/bin/pokemon-monitor
 
 Autostart verification:
@@ -693,12 +688,21 @@ Runtime/SQLite/logs: /home/kaian/.local/share/pokemon-release-monitor
 Private environment: /home/kaian/.config/pokemon-release-monitor/env
 Runtime directory is 700; environment must be 600; both owned by kaian.
 Service uses Node v24.21.0 at an absolute path and built dist/cli.js; no shell
-profile is needed. Only Cardcenter/30th Celebration notifications, no purchases.
-Normal polling is 90 +/- 15 seconds after completion, with HTTP backoff.
-Never delete SQLite to repair a transient error; never bypass Cardcenter 403/429.
+profile is needed. Only 30th Celebration notifications, no purchases.
+Polling targets 90 +/- 15 seconds between starts per store, staggered starts,
+maximum 3 concurrent store jobs. Per-store errors/backoff do not stop other stores.
+A zero count means no matching products on the verified discovery surface.
+If one store fails, inspect its status/backoff and journal before taking action.
+Never delete SQLite to repair a transient error; never bypass any store's 403/429.
 Do not run another monitor:once or monitor alongside the active service.
 
-For updates and rollback see:
-changes/2026-09-17-pokemon-release-monitor-deployment.md
-Stop service before updating, use clean main / git pull --ff-only, npm ci and
-full lint/typecheck/test/build before restarting. Keep runtime and secrets.
+Store coverage, disabled reasons and parser methods:
+/home/kaian/apps/PokemonReleaseMonitor/docs/STORES.md
+
+For updates and schema-aware rollback see:
+changes/2026-09-17-pokemon-multistore-high-priority.md
+Stop service before updating, back up SQLite before schema changes, use clean
+main / git pull --ff-only, npm ci and full lint/typecheck/test/build before
+restarting. Check all enabled stores after restart. Keep runtime and secrets.
+Downgrade to the original single-store version needs the pre-migration backup;
+do not casually restore an older DB or rerun initial activation.
