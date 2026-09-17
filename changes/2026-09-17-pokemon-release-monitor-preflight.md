@@ -1,7 +1,8 @@
 # PokemonReleaseMonitor deployment pre-flight
 
 Date: 2026-09-17
-Status: BLOCKED before clone; application is not deployed.
+Status: BLOCKED before clone; GitHub access restored, but app repository is empty.
+Application is not deployed.
 
 ## Purpose and intended scope
 
@@ -109,3 +110,24 @@ normal rollback; removing a service must not remove its SQLite database.
 
 CURRENT_STATE.md records the pending deployment. The everyday command runbook
 records the reserved runtime/config paths and explicitly absent service.
+
+## Follow-up: GitHub access restored, source missing
+
+After the user completed GitHub login on 2026-09-17:
+
+- gh auth status confirmed active account Kalmeidanot and HTTPS Git access.
+- gh repo view Kalmeidanot/PokemonReleaseMonitor reported isEmpty=true and
+  an empty defaultBranchRef.name; git ls-remote returned no refs.
+- git clone --branch main failed with Remote branch main not found in upstream
+  origin. No application source is available to inspect or deploy.
+- gh is now installed by the user. No Node/npm or additional OS package was
+  installed by Codex. sudo -n true still requires interactive authentication.
+- User must push the existing Windows application to this repository's main
+  branch, excluding secrets and runtime data. Do not create a replacement app
+  or an empty main branch merely to pass the clone check.
+- QA, Cardcenter, Pushover, SQLite and service/autostart validation remain pending.
+  No application code/configuration or existing server service was changed.
+
+The initial access-failure evidence above is historical; the current blocker is
+missing source in GitHub. All planned installation and recovery steps remain
+pending. Documentation diff/whitespace checks passed for this follow-up.

@@ -339,8 +339,9 @@ Currently installed/configured:
 ## PokemonReleaseMonitor (deployment pending)
 
 - Pre-flight completed 2026-09-17; application is not deployed or running.
-- Existing GitHub SSH key is limited to homelab-server and cannot read the app.
-  GitHub access and interactive sudo are required to finish deployment.
+- GitHub HTTPS access now works as Kalmeidanot through gh. The app repository
+  is empty (no branches/main), so the existing Windows source must be pushed
+  before deployment can continue. System installation also needs interactive sudo.
 - /home/kaian/apps created (755); runtime directory
   /home/kaian/.local/share/pokemon-release-monitor and config directory
   /home/kaian/.config/pokemon-release-monitor created (700), all kaian:kaian.

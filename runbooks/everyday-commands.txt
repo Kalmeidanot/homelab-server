@@ -662,7 +662,8 @@ encryption keys, or Codex authentication contents into documentation or Git.
 ============================================================
 
 2026-09-17: preparation only; app/service/autostart are not installed.
-GitHub access to PokemonReleaseMonitor must be configured before continuing.
+GitHub access now works, but PokemonReleaseMonitor is empty on GitHub.
+Push the existing Windows source to main before continuing deployment.
 No operational systemctl commands for this app are available yet.
 
 Reserved runtime path: /home/kaian/.local/share/pokemon-release-monitor
