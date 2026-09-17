@@ -656,3 +656,20 @@ Also check whether someone is actively watching Jellyfin before:
 When unsure, stop and inspect first. Do not paste commands you do not understand,
 and do not put passwords, API keys, tokens, private keys, recovery codes,
 encryption keys, or Codex authentication contents into documentation or Git.
+
+============================================================
+20. POKEMON RELEASE MONITOR (DEPLOYMENT PENDING)
+============================================================
+
+2026-09-17: preparation only; app/service/autostart are not installed.
+GitHub access to PokemonReleaseMonitor must be configured before continuing.
+No operational systemctl commands for this app are available yet.
+
+Reserved runtime path: /home/kaian/.local/share/pokemon-release-monitor
+Reserved config directory: /home/kaian/.config/pokemon-release-monitor
+Both are private (700), owned by kaian. No env file or database exists yet.
+Keep future runtime/SQLite and secrets outside the application Git checkout.
+Never paste Pushover keys into chat or put them in this repository.
+
+See changes/2026-09-17-pokemon-release-monitor-preflight.md for the blocker
+and remaining installation/validation steps.

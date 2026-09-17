@@ -335,3 +335,15 @@ Currently installed/configured:
 - Remote phone access through Tailscale was validated away from the home LAN
 - Reboot/autostart validation succeeded: Ubuntu and SSH returned, the Compose stack
   returned automatically, and Immich became available without manual startup
+
+## PokemonReleaseMonitor (deployment pending)
+
+- Pre-flight completed 2026-09-17; application is not deployed or running.
+- Existing GitHub SSH key is limited to homelab-server and cannot read the app.
+  GitHub access and interactive sudo are required to finish deployment.
+- /home/kaian/apps created (755); runtime directory
+  /home/kaian/.local/share/pokemon-release-monitor and config directory
+  /home/kaian/.config/pokemon-release-monitor created (700), all kaian:kaian.
+- No checkout, Node/npm installation, env file, SQLite database, systemd unit
+  or autostart exists yet. Cardcenter/Pushover and application QA remain untested.
+- Record: changes/2026-09-17-pokemon-release-monitor-preflight.md.
