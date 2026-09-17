@@ -1,0 +1,70 @@
+#!/bin/bash
+# Reviewed one-time upgrade. Run as kaian in the server terminal.
+set +x
+set -euo pipefail
+umask 077
+export PATH=/home/kaian/.local/opt/node-v24.21.0-linux-x64/bin:/usr/local/bin:/usr/bin:/bin
+app=/home/kaian/apps/PokemonReleaseMonitor
+runtime=/home/kaian/.local/share/pokemon-release-monitor
+previous=e5d1b98af8ae3d65d67c238f45817b8999537d6f
+target=e3df485f8fb77221cb4f4b916646a188e138c5fb
+[[ $(id -un) == kaian ]] || { echo 'Run as kaian.' >&2; exit 1; }
+cd "$app"
+[[ $(git remote get-url origin) == https://github.com/Kalmeidanot/PokemonReleaseMonitor.git ]]
+[[ $(git branch --show-current) == main ]]
+[[ -z $(git status --porcelain) ]]
+if [[ $(git rev-parse HEAD) == "$target" ]]; then
+  echo 'Target code already deployed. Inspect status; do not repeat a schema upgrade.'
+  systemctl status pokemon-release-monitor --no-pager
+  exit 0
+fi
+[[ $(git rev-parse HEAD) == "$previous" ]] || { echo 'Unexpected previous commit; review before deployment.' >&2; exit 1; }
+git fetch origin
+[[ $(git rev-parse origin/main) == "$target" ]] || { echo 'Remote main differs from reviewed target.' >&2; exit 1; }
+git merge-base --is-ancestor HEAD "$target"
+sudo -v
+sudo systemctl stop pokemon-release-monitor.service
+[[ $(systemctl is-active pokemon-release-monitor.service || true) == inactive ]]
+# Source, runtime and all other services are preserved. A failed step leaves this service stopped.
+trap 'echo "Deployment stopped by an error. Keep runtime; use the documented rollback and report the error." >&2' ERR
+python3 - <<'PY'
+import sqlite3,datetime,json
+from pathlib import Path
+r=Path('/home/kaian/.local/share/pokemon-release-monitor')
+s=sqlite3.connect(f'file:{r}/state.sqlite?mode=ro',uri=True)
+assert s.execute('pragma user_version').fetchone()[0]==0,'Expected legacy schema'
+assert s.execute('pragma integrity_check').fetchone()[0]=='ok'
+backup=r/'backups'/('pre-multistore-deploy-'+datetime.datetime.now(datetime.UTC).strftime('%Y%m%dT%H%M%SZ')+'.sqlite')
+assert not backup.exists()
+d=sqlite3.connect(backup);s.backup(d);d.close()
+receipt={'old_commit':'e5d1b98af8ae3d65d67c238f45817b8999537d6f','new_commit':'e3df485f8fb77221cb4f4b916646a188e138c5fb','backup':str(backup),'products':s.execute('select count(*) from products').fetchone()[0],'notifications':s.execute('select count(*) from notifications').fetchone()[0],'baseline':s.execute("select value from metadata where key='baseline_at'").fetchone()[0]}
+(r/'deploy-multistore.json').write_text(json.dumps(receipt,indent=2)+'\n');s.close()
+print('Consistent pre-migration backup:',backup)
+PY
+git merge --ff-only "$target"
+npm ci
+npm run build
+# Status opens and migrates SQLite without polling or sending notifications.
+/home/kaian/.local/bin/pokemon-monitor status
+python3 - <<'PY'
+import sqlite3,json
+from pathlib import Path
+r=Path('/home/kaian/.local/share/pokemon-release-monitor');receipt=json.loads((r/'deploy-multistore.json').read_text())
+s=sqlite3.connect(f'file:{r}/state.sqlite?mode=ro',uri=True);old=sqlite3.connect('file:'+receipt['backup']+'?mode=ro',uri=True)
+assert s.execute('pragma user_version').fetchone()[0]==2
+assert s.execute('pragma integrity_check').fetchone()[0]=='ok'
+assert not s.execute('pragma foreign_key_check').fetchall()
+assert s.execute("select count(*) from products where store_id='cardcenter'").fetchone()[0]==receipt['products']
+assert s.execute('select count(*) from notifications').fetchone()[0]==receipt['notifications']
+assert s.execute("select value from metadata where key='baseline_at'").fetchone()[0]==receipt['baseline']
+for product_id,url in old.execute('select id,url from products'):
+ assert s.execute('select url from products where id=?',('cardcenter:'+product_id,)).fetchone()==(url,)
+print('Migration verified: Cardcenter identities, baseline and notification history preserved.')
+PY
+install -m 755 /home/kaian/nas-admin/scripts/pokemon-monitor /home/kaian/.local/bin/pokemon-monitor
+sudo systemctl start pokemon-release-monitor.service
+systemctl is-enabled pokemon-release-monitor.service
+systemctl is-active pokemon-release-monitor.service
+systemctl status pokemon-release-monitor.service --no-pager
+trap - ERR
+echo 'Multi-store deployment finished. Codex can now observe 2-3 polling cycles.'
