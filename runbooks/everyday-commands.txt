@@ -598,6 +598,7 @@ Normally, you do NOT manually start these after a normal reboot:
 - Immich
 - Tailscale
 - UFW host firewall
+- PokemonReleaseMonitor (Cardcenter notifications)
 
 Jellyfin Funnel was configured persistently in background mode (--bg); normally
 no manual start is needed. Funnel recovery after reboot has not yet been tested.
@@ -661,16 +662,16 @@ encryption keys, or Codex authentication contents into documentation or Git.
 20. POKEMON RELEASE MONITOR
 ============================================================
 
-2026-09-17: app/QA/baseline ready; interactive activation still pending.
-Run once in your server terminal as kaian to enter hidden Pushover keys, test
-production access/notification delivery and install/enable/start the service:
+2026-09-17: installed, active and enabled for autostart. Pushover test accepted.
+No manual start is normally needed after reboot. For deliberate reinstallation
+only, the activation script validates existing environment and tests delivery:
 
 /home/kaian/nas-admin/scripts/pokemon-monitor-activate
 
 The script asks for sudo authentication when installing the system service.
 Never send keys in chat or commit them. If any test fails, service activation stops.
 
-After activation, normal operations:
+Normal operations:
 
 sudo systemctl status pokemon-release-monitor --no-pager
 sudo systemctl stop pokemon-release-monitor

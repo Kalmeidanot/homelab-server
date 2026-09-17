@@ -1,7 +1,7 @@
 # PokemonReleaseMonitor homelab deployment
 
 Date: 2026-09-17
-Status: App installed and baseline verified; awaiting interactive secrets and systemd activation.
+Status: Deployed, active and enabled; Pushover accepted and service polls verified.
 
 ## Purpose and scope
 
@@ -70,7 +70,7 @@ Initial status was empty. First complete poll succeeded at
   verified. Subsequent status correctly read the persistent baseline.
 
 Pushover keys were absent for this first discovery/baseline pass; the app supports
-this explicitly. No claim of successful notification delivery is made yet.
+this explicitly. Real Pushover API acceptance was verified during activation below.
 
 ## Systemd configuration and interactive activation
 
@@ -111,9 +111,9 @@ in the user's terminal because this Codex session has no noninteractive sudo.
 An existing different unit is preserved and requires review before replacement.
 An already active service is left alone. No sudoers or SSH-access changes.
 
-Pending at this record's initial writing: env-file creation, Pushover HTTP 200 /
-API status 1 evidence, installed unit, active/enabled status, two successful
-service polls, deduplication and restart persistence checks. No reboot required.
+Activation and live validation below completed the initially pending checks.
+No reboot was performed; enabled state and target dependencies validate the
+autostart configuration, not an actual reboot exercise.
 
 ## Everyday operations
 
@@ -181,3 +181,48 @@ Restoring an older database may affect deduplication; do not reset it casually.
 This change affects only files under the application checkout, ~/.local/opt,
 ~/.local/bin, the dedicated runtime/config directories and (after activation)
 the new /etc/systemd/system unit. No other service is restarted.
+
+## Activation evidence
+
+The user ran the activation script in a server terminal. Environment ownership
+and mode verified as 600 kaian:kaian; both keys non-empty, production runtime and
+NODE_ENV correct (values not printed). A second production monitor:once succeeded
+at 2026-09-17T19:30:18.538Z with the same 22 relevant / 14 blocked candidates.
+At 2026-09-17T19:30:19.292Z, notify:test logged HTTP 200, API status 1,
+accepted=true: a real Pushover test from homelab was accepted. The script then
+waited for interactive sudo to install the service. Do not repeat the test merely
+to produce another push; API acceptance is established.
+
+## Live service validation
+
+The user's terminal completed sudo installation. The installed unit exactly
+matches the tracked unit and is 644 root:root. systemctl reported enabled and
+active; User/Group=kaian; Wants/After include network-online.target. First start
+was 2026-09-17 21:31:37 CEST. Actual process command uses the pinned absolute Node
+binary and dist/cli.js monitor. No shell-profile dependency or root app process.
+
+Two complete consecutive service polls succeeded at 19:32:17.372Z and
+19:34:14.745Z, both with 2,631 listings, 22 relevant and 14 blocked candidates.
+There were no HTTP errors, 403/429, poll failures, notification failures or
+product notifications. NRestarts=0 and process remained active throughout.
+
+The user then exercised stop, start and restart in the terminal because sudo
+credentials are not available in the Codex session. Journal confirms a clean
+stop at 21:34:18 CEST, start, clean stop/restart at 21:34:19 and a new poll from
+PID 745529. Both stops logged Deactivated successfully (no forced kill). The
+original baseline_at=2026-09-17T19:25:52.387Z remained intact, while
+last_successful_poll advanced; notification rows and pending counts remained zero.
+
+Production app status helper works and loads the correct external runtime/env.
+Actual Pushover key values were checked in memory against Git-tracked files in
+both repositories: no matches. No key values were printed. Environment mode 600,
+config/runtime directories 700, owner kaian:kaian. App remains on its original
+clean source commit. No app commit/push or force-push was necessary.
+
+First post-restart poll also succeeded at 19:34:58.434Z with unchanged counts.
+Final checks: enabled, active, NRestarts=0, ExecMainStatus=0; SQLite integrity ok;
+five successful polls total (two one-shot plus three service polls), zero HTTP /
+poll / notification failure events and zero product notification rows. Baseline
+remained unchanged across restart. Test push is logged as TEST and is not a
+product notification row. Observation covers this deployment window, not future
+availability guarantees. Final documentation diff/whitespace review passed.

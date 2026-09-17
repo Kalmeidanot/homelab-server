@@ -336,7 +336,7 @@ Currently installed/configured:
 - Reboot/autostart validation succeeded: Ubuntu and SSH returned, the Compose stack
   returned automatically, and Immich became available without manual startup
 
-## PokemonReleaseMonitor (activation pending)
+## PokemonReleaseMonitor
 
 - Application installed at /home/kaian/apps/PokemonReleaseMonitor from main,
   commit e5d1b98af8ae3d65d67c238f45817b8999537d6f; source worktree unchanged.
@@ -346,10 +346,13 @@ Currently installed/configured:
   with state.sqlite, last-poll.json and logs/monitor.log (600).
 - First Cardcenter poll: 2,631 listings, 22 relevant products (all sold_out),
   14 language-blocked candidates; silent baseline, zero queued notifications.
-- Environment path: /home/kaian/.config/pokemon-release-monitor/env; creation
-  awaits hidden-input terminal entry of Pushover keys. No secrets in Git.
-- Unit and activation script prepared and validated in server repo. Service
-  installation/start/autostart and Pushover API acceptance await interactive
-  secrets and sudo; service is not yet running. No reboot has been performed.
-- Production app status after activation: /home/kaian/.local/bin/pokemon-monitor.
+- Environment: /home/kaian/.config/pokemon-release-monitor/env, 600 kaian:kaian,
+  with both Pushover keys confirmed non-empty. No secrets in Git.
+- Real homelab Pushover test accepted: HTTP 200 / API status 1.
+- pokemon-release-monitor.service installed, enabled and active as kaian; first
+  started 2026-09-17 21:31:37 CEST. Uses absolute Node path, built CLI, private umask,
+  restart-on-failure and network-online.target. Consecutive polls and clean
+  stop/start/restart verified; baseline preserved and no duplicate notifications.
+  Autostart configuration verified; no reboot performed.
+- Production app status: /home/kaian/.local/bin/pokemon-monitor.
 - Record: changes/2026-09-17-pokemon-release-monitor-deployment.md.
