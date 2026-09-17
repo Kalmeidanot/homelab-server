@@ -1,6 +1,6 @@
 # Current State
 
-Last updated: 2026-09-15
+Last updated: 2026-09-17
 
 ## Host
 
@@ -142,8 +142,24 @@ Currently installed/configured:
 - Jellyfin port 8096 was not directly exposed with router port forwarding;
   no router configuration was changed
 - Off-site Immich access over Tailscale is validated at
-  http://100.83.35.13:2283; Immich remains private, with remote access through
-  Tailscale only, and is not exposed through Funnel or direct port forwarding
+  http://100.83.35.13:2283; Tailscale is the intended private remote-access path.
+  Immich is not exposed through Funnel or direct router port forwarding, but
+  its Docker-published port still needs exposure hardening (see Host Firewall).
+
+## Host Firewall
+
+- UFW is active and enabled on system startup, with default incoming deny and
+  outgoing allow. LAN source 10.0.0.0/24 is allowed TCP ports 22 (SSH), 9090
+  (Cockpit), 445 (Samba), 8096 (Jellyfin), and 2283 (Immich).
+- All inbound traffic on tailscale0 and UDP port 41641 for Tailscale direct
+  connections are allowed. Fresh Windows SSH to 10.0.0.6 and LAN access worked;
+  Jellyfin and Immich were reachable from a Tailscale-connected device.
+- Immich remains Docker-published on 0.0.0.0:2283 and [::]:2283. Docker-published
+  ports may bypass normal UFW INPUT filtering; UFW alone does not establish
+  protection of port 2283. Immich/Tailscale exposure hardening remains pending.
+- SSH hardening is incomplete: PasswordAuthentication was still enabled during
+  the audit.
+- User-supplied completion evidence: [UFW activation](changes/2026-09-17-enable-ufw-firewall.md).
 
 ## Operational Reference
 
@@ -160,6 +176,21 @@ Currently installed/configured:
   were successfully validated; temporary test items were removed
 - Immich indexes only Bilder og Video through its separate, intentionally writable
   External Library bind; sibling categories and hidden are not mounted.
+
+## Samba Recycle Protection
+
+- Media (/srv/storage/media) and Archive (/srv/storage/archive) recycle protection
+  is active and tested through Windows SMB deletion, using .recycle/%U within
+  each share. A fresh client connection was required for Media after smbd reload.
+- Both .recycle roots and their kaian subdirectories were verified mode 700,
+  kaian:kaian. Test artifacts were removed; both roots remain present at mode 700,
+  kaian:kaian and must be preserved.
+- This is same-disk protection on the WD My Book, not backup. It covers SMB
+  deletes, not direct Linux or application/container deletes (including Immich),
+  disk failure, corruption, disk loss, or sufficiently privileged malicious access.
+  Recycled files continue consuming space until deliberately removed; deletion
+  inside .recycle is not recursively recycled.
+- User-supplied tests and configuration: [Samba recycle](changes/2026-09-17-enable-samba-recycle-bin.md).
 
 ## Personal Media Archive
 

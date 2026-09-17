@@ -85,8 +85,11 @@ Open in a web browser or Immich client on the home network.
 Immich remotely through Tailscale:
 http://100.83.35.13:2283
 
-Open on a device connected to the same private Tailscale network. Immich remains
-private and is not exposed through Funnel or direct router port forwarding.
+Open on a device connected to the same private Tailscale network. This is the
+intended private remote-access path; Immich is not exposed through Funnel or
+direct router port forwarding. Docker still publishes 0.0.0.0:2283 and [::]:2283,
+which may bypass normal UFW INPUT filtering. Exposure hardening remains pending;
+do not treat UFW alone as protection for this port.
 
 Windows Samba share:
 \\10.0.0.6\Media
@@ -154,6 +157,19 @@ Disables this Funnel endpoint; it does not disable normal private Tailscale
 access. Recheck "tailscale funnel status" and verify Jellyfin remains reachable
 on the LAN and through the private Tailscale address. Do not stop tailscaled or
 change Docker/router settings to disable Funnel.
+
+HOST FIREWALL (read-only checks for future administration, run on the server)
+
+sudo ufw status verbose
+sudo ufw status numbered
+systemctl is-enabled ufw
+
+Expected: UFW active, startup enabled, default incoming deny / outgoing allow.
+LAN 10.0.0.0/24 allows TCP 22, 9090, 445, 8096 and 2283; all inbound on
+tailscale0 and UDP 41641 are allowed. These checks do not prove Docker-published
+Immich port 2283 is restricted. Immich/Tailscale exposure hardening is pending.
+SSH hardening is also incomplete: PasswordAuthentication was enabled at audit.
+See changes/2026-09-17-enable-ufw-firewall.md.
 
 ============================================================
 4. BASIC LINUX NAVIGATION
@@ -425,6 +441,42 @@ scan, hashing or modification without fresh explicit authorization naming it.
 Do not restore intentionally deleted media from historical control records.
 Samba's human write access is separate from Immich's explicitly writable Bilder og Video bind.
 
+SAMBA RECYCLE PROTECTION
+
+Media and Archive recycle are active and tested. SMB deletes go to .recycle/%U
+inside each share, preserving the relative directory tree. For kaian, inspect
+only these recycle trees (run on the server as kaian):
+
+du -sh /srv/storage/media/.recycle /srv/storage/archive/.recycle
+find /srv/storage/media/.recycle/kaian /srv/storage/archive/.recycle/kaian -type f -print
+stat -c '%a %U:%G %n' /srv/storage/media/.recycle /srv/storage/media/.recycle/kaian /srv/storage/archive/.recycle /srv/storage/archive/.recycle/kaian
+
+Expected directory metadata: 700 kaian:kaian. Preserve both .recycle roots.
+These checks stay within the recycle areas; do not expand them to archive/merged
+or its excluded hidden tree. Recycled files consume space until deliberately
+removed. No broad cleanup/delete command is provided here.
+
+Read-only Samba configuration and connection checks (run on the server):
+
+testparm -s
+systemctl is-active smbd
+sudo smbstatus
+
+Expected: Loaded services file OK; smbd active. testparm checks configuration
+syntax, not end-to-end recycle behavior. An established SMB share connection may
+retain its previous configuration after smbd reload. After finishing transfers,
+close all SMB connections from the client, check sessions/locked files with
+smbstatus, and reconnect before testing new share settings. Media passed after
+this reconnect; the first test on an old connection did not recycle the file.
+
+Recycle is not backup or a general Linux filesystem recycle bin. It covers SMB
+deletes, not rm, application/container deletion (including Immich), disk failure,
+corruption, loss of the WD My Book, or sufficiently privileged malicious access.
+Files stay on the same physical disk. Deleting inside .recycle is not recursively
+recycled because recycle:exclude_dir = .recycle. Large movies are eligible:
+no size limits or file exclusions were configured.
+See changes/2026-09-17-enable-samba-recycle-bin.md for the full tests and recovery.
+
 ============================================================
 13. CHECK GIT / DOCUMENTATION
 ============================================================
@@ -545,6 +597,7 @@ Normally, you do NOT manually start these after a normal reboot:
 - Jellyfin
 - Immich
 - Tailscale
+- UFW host firewall
 
 Jellyfin Funnel was configured persistently in background mode (--bg); normally
 no manual start is needed. Funnel recovery after reboot has not yet been tested.

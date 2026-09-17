@@ -76,7 +76,11 @@ future maintenance and never restore intentionally deleted media from old record
 
 The existing authenticated read/write Samba Archive share continues to expose
 /srv/storage/archive for human management. Samba access and Immich container
-access are separate controls; no Samba configuration changed during this task.
+access are separate controls. Both Media and Archive now use Samba recycle at
+.recycle/%U within each share, with mode 0700 directories. This protects SMB
+deletes on the same WD My Book; it is not backup and does not cover direct Linux
+or container deletion, including Immich's writable archive access. See
+[recycle configuration and tests](changes/2026-09-17-enable-samba-recycle-bin.md).
 
 Containers should receive only the access they require; Jellyfin mounts
 /srv/storage/media read-only at /media.
@@ -131,8 +135,8 @@ runtime cleanup; its presence in status does not establish that the old URL work
 
 Only Jellyfin is intentionally public through Funnel. Its Internet-facing login
 surface means Jellyfin accounts should use strong unique passwords. Immich
-remains private, reachable remotely only on the tailnet at
-http://100.83.35.13:2283; it is not exposed through Funnel. Cockpit, SSH, Samba
+uses the tailnet at http://100.83.35.13:2283 as its intended private remote-access
+path; it is not exposed through Funnel. Cockpit, SSH, Samba
 and other services are not exposed through Funnel either.
 
 Router port forwarding is still not used for Jellyfin or Immich; port 8096 was
@@ -149,6 +153,12 @@ changes/2026-09-12-rename-tailscale-tailnet-dns.md for the historical post-renam
 mismatch and pending validation at that time. See
 changes/2026-09-13-validate-jellyfin-funnel-after-dns-rename.md for the successful
 HTTPS and TV-client connection validation and remaining legacy-entry cleanup.
+
+UFW is active and enabled at startup with default incoming deny / outgoing allow,
+explicit home-LAN service allows and Tailscale allows. Immich still publishes
+0.0.0.0:2283 and [::]:2283 through Docker, which may bypass normal UFW INPUT
+filtering. Its exposure is not fully hardened; Immich/Tailscale hardening and SSH
+hardening remain pending. See [firewall rules and caveats](changes/2026-09-17-enable-ufw-firewall.md).
 
 ## Jellyfin
 
