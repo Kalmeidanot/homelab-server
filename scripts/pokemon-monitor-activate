@@ -1,0 +1,65 @@
+#!/bin/bash
+# Run directly in an interactive terminal as kaian. Never pass keys as arguments.
+set +x
+set -euo pipefail
+umask 077
+[[ $(id -un) == kaian ]] || { echo 'Run as kaian.' >&2; exit 1; }
+[[ -t 0 ]] || { echo 'Run this script directly in your server terminal.' >&2; exit 1; }
+node_bin=/home/kaian/.local/opt/node-v24.21.0-linux-x64/bin/node
+config_dir=/home/kaian/.config/pokemon-release-monitor
+env_file=$config_dir/env
+unit_source=/home/kaian/nas-admin/systemd/pokemon-release-monitor.service
+unit_target=/etc/systemd/system/pokemon-release-monitor.service
+[[ -f /home/kaian/apps/PokemonReleaseMonitor/dist/cli.js ]] || { echo 'Build missing.' >&2; exit 1; }
+if [[ -e $unit_target ]]; then
+  cmp -s "$unit_source" "$unit_target" || { echo 'Installed unit differs; review before replacing.' >&2; exit 1; }
+fi
+if systemctl is-active --quiet pokemon-release-monitor.service; then
+  echo 'Service is already active; no changes made.'
+  exit 0
+fi
+if [[ ! -e $env_file ]]; then
+  install -d -m 700 "$config_dir"
+  read -r -s -p 'PUSHOVER_USER_KEY (hidden): ' pushover_user
+  printf '\n'
+  read -r -s -p 'PUSHOVER_APP_TOKEN (hidden): ' pushover_token
+  printf '\n'
+  [[ $pushover_user =~ ^[[:alnum:]]+$ && $pushover_token =~ ^[[:alnum:]]+$ ]] || {
+    echo 'Both keys must be non-empty and alphanumeric. No file written.' >&2; exit 1;
+  }
+  env_temp=$(mktemp "$config_dir/.env.XXXXXXXX")
+  trap 'rm -f -- "${env_temp:-}"' EXIT
+  printf 'PUSHOVER_USER_KEY=%s\nPUSHOVER_APP_TOKEN=%s\nPOKEMON_MONITOR_RUNTIME_DIR=/home/kaian/.local/share/pokemon-release-monitor\nNODE_ENV=production\n' \
+    "$pushover_user" "$pushover_token" > "$env_temp"
+  chmod 600 "$env_temp"
+  # No-clobber creation: preserve any file created concurrently.
+  ln "$env_temp" "$env_file"
+  rm -f -- "$env_temp"
+  trap - EXIT
+  unset pushover_user pushover_token
+fi
+[[ $(stat -c '%a:%U' "$env_file") == '600:kaian' ]] || {
+  echo 'Environment file must be owned by kaian with mode 600.' >&2; exit 1;
+}
+"$node_bin" --env-file="$env_file" --input-type=module -e '
+const e=process.env;
+if (!e.PUSHOVER_USER_KEY?.trim() || !e.PUSHOVER_APP_TOKEN?.trim() ||
+    e.POKEMON_MONITOR_RUNTIME_DIR !== "/home/kaian/.local/share/pokemon-release-monitor" ||
+    e.NODE_ENV !== "production") {
+  console.error("Production environment is missing required configuration."); process.exit(1);
+}
+console.log("Production environment validated; both Pushover keys are non-empty.");'
+/home/kaian/.local/bin/pokemon-monitor status
+/home/kaian/.local/bin/pokemon-monitor monitor:once
+/home/kaian/.local/bin/pokemon-monitor notify:test
+# The application's notify:test requires an accepted API response, not just HTTP transport success.
+# No service is enabled/started if either production test above fails.
+sudo install -o root -g root -m 644 "$unit_source" "$unit_target"
+sudo systemctl daemon-reload
+sudo systemctl enable pokemon-release-monitor.service
+sudo systemctl start pokemon-release-monitor.service
+systemctl is-enabled pokemon-release-monitor.service
+systemctl is-active pokemon-release-monitor.service
+systemctl status pokemon-release-monitor.service --no-pager
+journalctl -u pokemon-release-monitor.service -n 25 --no-pager
+echo 'Activation finished. Codex can now verify multiple polls and persistent state.'

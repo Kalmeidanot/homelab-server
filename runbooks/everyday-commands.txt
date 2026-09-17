@@ -658,19 +658,46 @@ and do not put passwords, API keys, tokens, private keys, recovery codes,
 encryption keys, or Codex authentication contents into documentation or Git.
 
 ============================================================
-20. POKEMON RELEASE MONITOR (DEPLOYMENT PENDING)
+20. POKEMON RELEASE MONITOR
 ============================================================
 
-2026-09-17: preparation only; app/service/autostart are not installed.
-GitHub access now works, but PokemonReleaseMonitor is empty on GitHub.
-Push the existing Windows source to main before continuing deployment.
-No operational systemctl commands for this app are available yet.
+2026-09-17: app/QA/baseline ready; interactive activation still pending.
+Run once in your server terminal as kaian to enter hidden Pushover keys, test
+production access/notification delivery and install/enable/start the service:
 
-Reserved runtime path: /home/kaian/.local/share/pokemon-release-monitor
-Reserved config directory: /home/kaian/.config/pokemon-release-monitor
-Both are private (700), owned by kaian. No env file or database exists yet.
-Keep future runtime/SQLite and secrets outside the application Git checkout.
-Never paste Pushover keys into chat or put them in this repository.
+/home/kaian/nas-admin/scripts/pokemon-monitor-activate
 
-See changes/2026-09-17-pokemon-release-monitor-preflight.md for the blocker
-and remaining installation/validation steps.
+The script asks for sudo authentication when installing the system service.
+Never send keys in chat or commit them. If any test fails, service activation stops.
+
+After activation, normal operations:
+
+sudo systemctl status pokemon-release-monitor --no-pager
+sudo systemctl stop pokemon-release-monitor
+sudo systemctl start pokemon-release-monitor
+sudo systemctl restart pokemon-release-monitor
+journalctl -u pokemon-release-monitor -n 100 --no-pager
+
+Manual live logs (Ctrl+C exits):
+journalctl -u pokemon-release-monitor -f
+
+Production app status, including baseline and pending notifications:
+/home/kaian/.local/bin/pokemon-monitor
+
+Autostart verification:
+systemctl is-enabled pokemon-release-monitor
+
+Checkout: /home/kaian/apps/PokemonReleaseMonitor
+Runtime/SQLite/logs: /home/kaian/.local/share/pokemon-release-monitor
+Private environment: /home/kaian/.config/pokemon-release-monitor/env
+Runtime directory is 700; environment must be 600; both owned by kaian.
+Service uses Node v24.21.0 at an absolute path and built dist/cli.js; no shell
+profile is needed. Only Cardcenter/30th Celebration notifications, no purchases.
+Normal polling is 90 +/- 15 seconds after completion, with HTTP backoff.
+Never delete SQLite to repair a transient error; never bypass Cardcenter 403/429.
+Do not run another monitor:once or monitor alongside the active service.
+
+For updates and rollback see:
+changes/2026-09-17-pokemon-release-monitor-deployment.md
+Stop service before updating, use clean main / git pull --ff-only, npm ci and
+full lint/typecheck/test/build before restarting. Keep runtime and secrets.

@@ -1,0 +1,22 @@
+[Unit]
+Description=PokemonReleaseMonitor - Cardcenter release notifications
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=kaian
+Group=kaian
+WorkingDirectory=/home/kaian/apps/PokemonReleaseMonitor
+EnvironmentFile=/home/kaian/.config/pokemon-release-monitor/env
+ExecStart=/home/kaian/.local/opt/node-v24.21.0-linux-x64/bin/node /home/kaian/apps/PokemonReleaseMonitor/dist/cli.js monitor
+Restart=on-failure
+RestartSec=15
+KillSignal=SIGTERM
+TimeoutStopSec=90
+UMask=0077
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

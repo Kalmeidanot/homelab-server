@@ -336,15 +336,20 @@ Currently installed/configured:
 - Reboot/autostart validation succeeded: Ubuntu and SSH returned, the Compose stack
   returned automatically, and Immich became available without manual startup
 
-## PokemonReleaseMonitor (deployment pending)
+## PokemonReleaseMonitor (activation pending)
 
-- Pre-flight completed 2026-09-17; application is not deployed or running.
-- GitHub HTTPS access now works as Kalmeidanot through gh. The app repository
-  is empty (no branches/main), so the existing Windows source must be pushed
-  before deployment can continue. System installation also needs interactive sudo.
-- /home/kaian/apps created (755); runtime directory
-  /home/kaian/.local/share/pokemon-release-monitor and config directory
-  /home/kaian/.config/pokemon-release-monitor created (700), all kaian:kaian.
-- No checkout, Node/npm installation, env file, SQLite database, systemd unit
-  or autostart exists yet. Cardcenter/Pushover and application QA remain untested.
-- Record: changes/2026-09-17-pokemon-release-monitor-preflight.md.
+- Application installed at /home/kaian/apps/PokemonReleaseMonitor from main,
+  commit e5d1b98af8ae3d65d67c238f45817b8999537d6f; source worktree unchanged.
+- Node v24.21.0 / npm 11.19.0 installed under ~/.local/opt; node/npm/npx
+  symlinks under ~/.local/bin. npm ci, lint, typecheck, 56 tests and build pass.
+- Runtime: /home/kaian/.local/share/pokemon-release-monitor (700 kaian:kaian),
+  with state.sqlite, last-poll.json and logs/monitor.log (600).
+- First Cardcenter poll: 2,631 listings, 22 relevant products (all sold_out),
+  14 language-blocked candidates; silent baseline, zero queued notifications.
+- Environment path: /home/kaian/.config/pokemon-release-monitor/env; creation
+  awaits hidden-input terminal entry of Pushover keys. No secrets in Git.
+- Unit and activation script prepared and validated in server repo. Service
+  installation/start/autostart and Pushover API acceptance await interactive
+  secrets and sudo; service is not yet running. No reboot has been performed.
+- Production app status after activation: /home/kaian/.local/bin/pokemon-monitor.
+- Record: changes/2026-09-17-pokemon-release-monitor-deployment.md.
