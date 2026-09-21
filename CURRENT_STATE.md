@@ -404,3 +404,15 @@ Currently installed/configured:
   and new product); price commands sent none. Current rows 490 products / 346
   notifications. RIP & SHIP titles correctly excluded by the new price matcher.
   Initial app audit is timestamped 19:01:43; later delta is in the server record.
+
+### Opening-service exclusion prepared (2026-09-21)
+
+- Reviewed app e54abfca13e27b03cc470cd7e517b76a3441856a published to feature/main;
+  production still runs 18fd2bf until the exact restart deployment is executed.
+- Shared purchase-mode policy; explicit sealed-only Shopify stock/price on mixed
+  pages; 16 old service listings found at six stores. Schema remains 2; historical
+  notifications retained. 319 tests/lint/typecheck/build passed.
+- User terminal action required because sudo needs interactive authentication:
+  /home/kaian/nas-admin/scripts/pokemon-monitor-deploy-opening-filter
+- Backup, restart, state checks, post-observation and rollback to 18fd2bf:
+  changes/2026-09-21-pokemon-opening-exclusion.md.

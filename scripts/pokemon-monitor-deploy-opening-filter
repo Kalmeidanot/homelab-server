@@ -1,0 +1,80 @@
+#!/bin/bash
+# Exact reviewed global opening-service exclusion. Run as kaian in a terminal.
+set +x
+set -euo pipefail
+umask 077
+export PATH=/home/kaian/.local/opt/node-v24.21.0-linux-x64/bin:/usr/local/bin:/usr/bin:/bin
+app=/home/kaian/apps/PokemonReleaseMonitor
+runtime=/home/kaian/.local/share/pokemon-release-monitor
+previous=18fd2bf4b87bc926d96d2591d2371a50c233bb0d
+target=e54abfca13e27b03cc470cd7e517b76a3441856a
+[[ $(id -un) == kaian ]] || { echo 'Run as kaian, not root.' >&2; exit 1; }
+cd "$app"
+[[ $(git remote get-url origin) == https://github.com/Kalmeidanot/PokemonReleaseMonitor.git ]]
+[[ $(git branch --show-current) == main && -z $(git status --porcelain) ]]
+if [[ $(git rev-parse HEAD) == "$target" ]]; then
+  echo 'Target already checked out. Inspect deploy-opening-filter.json and service; do not repeat.'
+  systemctl status pokemon-release-monitor.service --no-pager
+  exit 0
+fi
+[[ $(git rev-parse HEAD) == "$previous" ]] || { echo 'Unexpected old commit.' >&2; exit 1; }
+git fetch origin
+[[ $(git rev-parse origin/main) == "$target" ]] || { echo 'Remote differs from reviewed target.' >&2; exit 1; }
+git merge-base --is-ancestor "$previous" "$target"
+# Password entry is only in the user's terminal. Never pass a password to a tool.
+sudo -v
+sudo systemctl stop pokemon-release-monitor.service
+[[ $(systemctl is-active pokemon-release-monitor.service || true) == inactive ]]
+trap 'echo "Deployment stopped on error. Preserve runtime; see nas-admin/changes/2026-09-21-pokemon-opening-exclusion.md for rollback." >&2' ERR
+python3 - <<'PY'
+import datetime,json,sqlite3
+from pathlib import Path
+r=Path('/home/kaian/.local/share/pokemon-release-monitor')
+s=sqlite3.connect(f'file:{r}/state.sqlite?mode=ro',uri=True)
+assert s.execute('pragma user_version').fetchone()[0]==2
+assert s.execute('pragma integrity_check').fetchone()[0]=='ok'
+assert not s.execute('pragma foreign_key_check').fetchall()
+b=r/'backups'/('pre-opening-filter-'+datetime.datetime.now(datetime.UTC).strftime('%Y%m%dT%H%M%SZ')+'.sqlite')
+assert not b.exists();out=sqlite3.connect(b);s.backup(out)
+assert out.execute('pragma integrity_check').fetchone()[0]=='ok';out.close()
+d={'prepared_at':datetime.datetime.now(datetime.UTC).isoformat(),'old_commit':'18fd2bf4b87bc926d96d2591d2371a50c233bb0d','new_commit':'e54abfca13e27b03cc470cd7e517b76a3441856a','backup':str(b),'products':s.execute('select count(*) from products').fetchone()[0],'notifications':s.execute('select count(*) from notifications').fetchone()[0],'schema':2,'status':'backed_up'}
+(r/'deploy-opening-filter.json').write_text(json.dumps(d,indent=2)+'\n');s.close()
+print('Consistent backup:',b)
+PY
+git merge --ff-only "$target"
+npm ci
+npm run build
+# Reclassify while stopped, before the first production poll. No notifier/network.
+node --input-type=module - <<'JS'
+import {State} from './dist/state.js';
+const s=new State('/home/kaian/.local/share/pokemon-release-monitor/state.sqlite');
+try { const a=s.reclassifyPurchaseModes(),b=s.reclassifyPurchaseModes();if(a!==b)throw Error('Non-idempotent reclassification');console.log('Policy-blocked existing rows:',a); } finally {s.close();}
+JS
+python3 - <<'PY'
+import json,sqlite3
+from pathlib import Path
+r=Path('/home/kaian/.local/share/pokemon-release-monitor');d=json.loads((r/'deploy-opening-filter.json').read_text())
+s=sqlite3.connect(f'file:{r}/state.sqlite?mode=ro',uri=True);b=sqlite3.connect('file:'+d['backup']+'?mode=ro',uri=True)
+assert s.execute('pragma integrity_check').fetchone()[0]=='ok'
+assert not s.execute('pragma foreign_key_check').fetchall()
+assert s.execute('pragma user_version').fetchone()[0]==2
+for t in ['products','notifications']:assert s.execute('select count(*) from '+t).fetchone()[0]==d[t]
+assert s.execute('select id,url,first_seen_at from products order by id').fetchall()==b.execute('select id,url,first_seen_at from products order by id').fetchall()
+assert s.execute("select * from notifications where status='sent' order by id").fetchall()==b.execute("select * from notifications where status='sent' order by id").fetchall()
+assert s.execute("select key,value from metadata where key like '%baseline_at' order by key").fetchall()==b.execute("select key,value from metadata where key like '%baseline_at' order by key").fetchall()
+assert not s.execute("select id from products where blocked_reason like 'PURCHASE_MODE:%' and (relevant<>0 or orderable<>0 or availability<>'unknown' or last_price_nok is not null)").fetchall()
+d['blocked_rows']=s.execute("select count(*) from products where blocked_reason like 'PURCHASE_MODE:%'").fetchone()[0]
+d['status']='reclassified';(r/'deploy-opening-filter.json').write_text(json.dumps(d,indent=2)+'\n')
+print('Products, sent history and baselines preserved; schema 2/integrity/FK OK.')
+PY
+sudo systemctl start pokemon-release-monitor.service
+systemctl is-enabled pokemon-release-monitor.service
+systemctl is-active pokemon-release-monitor.service
+python3 - <<'PY'
+import datetime,json
+from pathlib import Path
+p=Path('/home/kaian/.local/share/pokemon-release-monitor/deploy-opening-filter.json');d=json.loads(p.read_text());d.update(status='started',started_at=datetime.datetime.now(datetime.UTC).isoformat());p.write_text(json.dumps(d,indent=2)+'\n')
+PY
+systemctl status pokemon-release-monitor.service --no-pager
+trap - ERR
+echo 'Opening filter deployed. Codex must now observe 2–3 poll cycles and verify state/prices.'
