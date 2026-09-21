@@ -1,0 +1,76 @@
+#!/bin/bash
+# Exact reviewed read-only side-command deployment. No service stop/restart or sudo.
+set +x
+set -euo pipefail
+umask 077
+export PATH=/home/kaian/.local/opt/node-v24.21.0-linux-x64/bin:/usr/local/bin:/usr/bin:/bin
+app=/home/kaian/apps/PokemonReleaseMonitor
+staging=/home/kaian/apps/PokemonReleaseMonitor-prices
+runtime=/home/kaian/.local/share/pokemon-release-monitor
+previous=9cc913ac8860cd4c0dd6d1451f4cc979a972c354
+target=18fd2bf4b87bc926d96d2591d2371a50c233bb0d
+[[ $(id -un) == kaian ]]
+[[ $(git -C "$app" remote get-url origin) == https://github.com/Kalmeidanot/PokemonReleaseMonitor.git ]]
+[[ $(git -C "$app" branch --show-current) == main ]]
+[[ -z $(git -C "$app" status --porcelain) && -z $(git -C "$staging" status --porcelain) ]]
+[[ $(git -C "$staging" rev-parse HEAD) == "$target" ]]
+if [[ $(git -C "$app" rev-parse HEAD) == "$target" ]]; then
+  echo 'Target already present; inspect deploy-prices.json and CLI instead of repeating.'
+  exit 0
+fi
+[[ $(git -C "$app" rev-parse HEAD) == "$previous" ]]
+git -C "$app" fetch origin
+[[ $(git -C "$app" rev-parse origin/main) == "$target" ]]
+git -C "$app" merge-base --is-ancestor "$previous" "$target"
+# Fail if anything in the continuously running monitor path or dependency graph changed.
+git -C "$app" diff --exit-code "$previous" "$target" -- src/product.ts src/state.ts src/monitor.ts src/scheduler.ts src/notifier.ts src/http.ts src/log.ts src/config.ts src/cardcenter.ts src/adapters config/default.json config/stores.json config/product-families.json package-lock.json
+systemctl is-active pokemon-release-monitor.service
+systemctl is-enabled pokemon-release-monitor.service
+cd "$staging"
+npm run build
+# The tested build must leave every existing shared module byte-identical.
+python3 - <<'PY'
+from pathlib import Path
+app=Path('/home/kaian/apps/PokemonReleaseMonitor/dist');stage=Path('/home/kaian/apps/PokemonReleaseMonitor-prices/dist')
+for f in app.rglob('*.js'):
+ if f.name!='cli.js':assert f.read_bytes()==(stage/f.relative_to(app)).read_bytes(),f
+PY
+python3 - <<'PY'
+import datetime,json,sqlite3,subprocess,shutil
+from pathlib import Path
+r=Path('/home/kaian/.local/share/pokemon-release-monitor')
+b=r/'backups'/('pre-prices-'+datetime.datetime.now(datetime.UTC).strftime('%Y%m%dT%H%M%SZ'))
+b.mkdir(mode=0o700)
+s=sqlite3.connect(f'file:{r}/state.sqlite?mode=ro',uri=True)
+out=sqlite3.connect(b/'state.sqlite');s.backup(out)
+assert out.execute('pragma integrity_check').fetchone()[0]=='ok'
+assert not out.execute('pragma foreign_key_check').fetchall()
+assert out.execute('pragma user_version').fetchone()[0]==2
+receipt={'prepared_at':datetime.datetime.now(datetime.UTC).isoformat(),'backup':str(b),'old_commit':'9cc913ac8860cd4c0dd6d1451f4cc979a972c354','new_commit':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'pid':int(subprocess.check_output(['systemctl','show','pokemon-release-monitor.service','-p','MainPID','--value'],text=True)),'products':out.execute('select count(*) from products').fetchone()[0],'notifications':out.execute('select count(*) from notifications').fetchone()[0],'schema':2,'status':'backed_up'}
+shutil.copy2('/home/kaian/apps/PokemonReleaseMonitor/dist/cli.js',b/'cli.js')
+shutil.copy2('/home/kaian/.local/bin/pokemon-monitor',b/'pokemon-monitor')
+(r/'deploy-prices.json').write_text(json.dumps(receipt,indent=2)+'\n')
+out.close();s.close();print('Online backup:',b)
+PY
+git -C "$app" merge --ff-only "$target"
+# Install prices first, dispatch second, wrapper last; each replacement is atomic.
+python3 - <<'PY'
+import os,shutil
+from pathlib import Path
+for source,target,mode in [
+ ('/home/kaian/apps/PokemonReleaseMonitor-prices/dist/prices.js','/home/kaian/apps/PokemonReleaseMonitor/dist/prices.js',0o644),
+ ('/home/kaian/apps/PokemonReleaseMonitor-prices/dist/cli.js','/home/kaian/apps/PokemonReleaseMonitor/dist/cli.js',0o644),
+ ('/home/kaian/nas-admin/scripts/pokemon-monitor','/home/kaian/.local/bin/pokemon-monitor',0o755),
+]:
+ temporary=Path(target+'.prices-new');shutil.copyfile(source,temporary);temporary.chmod(mode);os.replace(temporary,target)
+PY
+/home/kaian/.local/bin/pokemon-monitor cheapest etb
+python3 - <<'PY'
+import datetime,json,subprocess
+from pathlib import Path
+p=Path('/home/kaian/.local/share/pokemon-release-monitor/deploy-prices.json');d=json.loads(p.read_text())
+assert d['pid']==int(subprocess.check_output(['systemctl','show','pokemon-release-monitor.service','-p','MainPID','--value'],text=True))
+subprocess.run(['systemctl','is-active','pokemon-release-monitor.service'],check=True)
+d.update(status='installed_without_restart',installed_at=datetime.datetime.now(datetime.UTC).isoformat());p.write_text(json.dumps(d,indent=2)+'\n')
+print('Side commands installed; monitor PID unchanged. Verify polls/state next.')
+PY

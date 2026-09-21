@@ -697,6 +697,24 @@ If one store fails, inspect its status/backoff and journal before taking action.
 Never delete SQLite to repair a transient error; never bypass any store's 403/429.
 Do not run another monitor:once or monitor alongside the active service.
 
+Read-only price comparisons (no notifier credentials, no HTTP, no state writes):
+pokemon-monitor cheapest
+pokemon-monitor cheapest etb
+pokemon-monitor cheapest binder
+pokemon-monitor prices
+pokemon-monitor prices greninja
+pokemon-monitor prices --json
+
+Product price excludes shipping. Cheapest observed can be sold out; cheapest
+buyable requires available/open preorder and fresh data (<=10 minutes). Missing,
+0/1 kr, foreign-language or ambiguous products cannot win. DEFAULT_OR_UNKNOWN
+is not verified English. Complete prices lists excluded/review reasons too.
+No migration/restart needed for these side commands. Model and current audit:
+/home/kaian/apps/PokemonReleaseMonitor/docs/CANONICAL_PRICES.md
+/home/kaian/apps/PokemonReleaseMonitor/docs/PRICE_AUDIT_2026-09-21.md
+Exact price CLI deployment and code-only rollback:
+changes/2026-09-21-pokemon-canonical-prices.md
+
 Store coverage, disabled reasons and parser methods:
 /home/kaian/apps/PokemonReleaseMonitor/docs/STORES.md
 

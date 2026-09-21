@@ -4,8 +4,15 @@ set +x
 umask 077
 export PATH=/home/kaian/.local/opt/node-v24.21.0-linux-x64/bin:/usr/local/bin:/usr/bin:/bin
 case "${1:-status}" in
+  cheapest|prices)
+    command_name=$1
+    shift
+    export POKEMON_MONITOR_RUNTIME_DIR=/home/kaian/.local/share/pokemon-release-monitor
+    cd /home/kaian/apps/PokemonReleaseMonitor
+    exec /home/kaian/.local/opt/node-v24.21.0-linux-x64/bin/node dist/cli.js "$command_name" "$@"
+    ;;
   status|monitor:once|notify:test|notify:test:high) command_name=${1:-status} ;;
-  *) echo 'Usage: pokemon-monitor [status|monitor:once|notify:test|notify:test:high]' >&2; exit 2 ;;
+  *) echo 'Usage: pokemon-monitor [status|monitor:once|notify:test|notify:test:high|cheapest [filter]|prices [filter|--json]]' >&2; exit 2 ;;
 esac
 cd /home/kaian/apps/PokemonReleaseMonitor
 exec /home/kaian/.local/opt/node-v24.21.0-linux-x64/bin/node \

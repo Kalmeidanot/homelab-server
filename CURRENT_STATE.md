@@ -339,8 +339,8 @@ Currently installed/configured:
 ## PokemonReleaseMonitor
 
 - App: /home/kaian/apps/PokemonReleaseMonitor, clean main at
-  9cc913ac8860cd4c0dd6d1451f4cc979a972c354; feature/main pushed without force.
-- Node 24.21.0/npm 11.19.0 unchanged. npm ci, lint, typecheck, 142 tests/build pass.
+  18fd2bf4b87bc926d96d2591d2371a50c233bb0d; feature/main pushed without force.
+- Node 24.21.0/npm 11.19.0 unchanged. npm ci, lint, typecheck, 236 tests/build pass.
 - 32 enabled stores / 28 deferred from the existing 60-store register. Added Norli,
   Extra Leker, Cardstore, MaxGaming Norway, LABOGE on 2026-09-21. ARK remains
   deferred: online/store stock split verified, complete bounded discovery unverified.
@@ -354,7 +354,8 @@ Currently installed/configured:
   measured fixed-order starvation. Actual intervals can exceed the target under load.
 - Runtime /home/kaian/.local/share/pokemon-release-monitor (700 kaian), schema 2.
   All 442 pre-wave product records/identities and 340 notifications preserved.
-  Current 487 product rows; notification rows remained 340 through verification.
+  Wave-two verification had 487 product rows and 340 notification rows;
+  price-phase preflight later had 489 / 344 from normal monitoring.
   Exactly five silent baselines; no repeats on the fairness restart, no duplicate push.
 - SQLite integrity/FK checks ok; no schema migration. Fresh final backup:
   backups/pre-wave2-20260921T182016Z.sqlite under runtime. Original wave backup
@@ -368,10 +369,34 @@ Currently installed/configured:
 - All five additions completed >=3 successful polls after final restart. All 26
   previously healthy stores succeeded. Existing PokeNordic HTTP 429/backoff persists;
   it predated this change. No new poll/parser/notification errors or rate-limit storm.
-- Final resource snapshot: 363.78 MiB service RAM,
+- Wave-two resource snapshot: 363.78 MiB service RAM,
   5.67% of one core sampled; SQLite 12.29 MiB plus WAL,
   rotated logs about 2.92 MiB total.
   Before this phase: ~404 MiB / 3.54%; historical rollout: 301 MiB / 5.3%.
 - Status: /home/kaian/.local/bin/pokemon-monitor. Current deployment, QA, direct
-  evidence and rollback: changes/2026-09-21-pokemon-store-wave2.md.
+  evidence and rollback for store wave: changes/2026-09-21-pokemon-store-wave2.md.
   Historical schema migration: changes/2026-09-17-pokemon-multistore-high-priority.md.
+
+### Canonical products and price side commands (2026-09-21)
+
+- `pokemon-monitor cheapest [filter]` and `pokemon-monitor prices [filter]` now
+  available; `prices --json` exports the complete audit. Product price excludes
+  shipping; no new notifications, scraping, purchase or web dashboard.
+- Deterministic config/canonical-products.json: 22 identities; snapshot 144 mapped
+  listings, 242 unmapped individual-card rows, 50 review-required, 53 language-blocked.
+  20 canonical products at 2+ stores. Combined variants/services remain unranked.
+- Valid NOK >1, <=10-minute freshness with matching product/store observation time.
+  Actionable requires available/open preorder, orderable and no store error.
+  DEFAULT_OR_UNKNOWN remains labelled; null/placeholder never wins.
+- Read-only SQLite, no migration or State/notifier setup. App model/audit docs:
+  docs/CANONICAL_PRICES.md and docs/PRICE_AUDIT_2026-09-21.md.
+- Deployed at 19:05:16 UTC with online backup; unchanged PID 1750225 and service
+  start time, no restart. Shared monitor dist modules byte-identical. Exact script:
+  scripts/pokemon-monitor-deploy-prices; receipt runtime/deploy-prices.json.
+- Backup: runtime/backups/pre-prices-20260921T190516Z (SQLite + old wrapper/CLI).
+  Rollback app 9cc913a without state restore; complete record and post-checks:
+  changes/2026-09-21-pokemon-canonical-prices.md.
+- Post-check 19:07:17 UTC: all 31 previously healthy stores successfully polled
+  after deployment; PokeNordic's prior 429/backoff remains. No new errors/pushes.
+  SQLite integrity/FK checks passed; all 489 products, 344 notification records and
+  32 baseline timestamps preserved. Notifications identical to phase preflight.
