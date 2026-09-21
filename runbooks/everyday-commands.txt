@@ -598,7 +598,7 @@ Normally, you do NOT manually start these after a normal reboot:
 - Immich
 - Tailscale
 - UFW host firewall
-- PokemonReleaseMonitor (27-store release notifications)
+- PokemonReleaseMonitor (32-store release notifications)
 
 Jellyfin Funnel was configured persistently in background mode (--bg); normally
 no manual start is needed. Funnel recovery after reboot has not yet been tested.
@@ -662,7 +662,7 @@ encryption keys, or Codex authentication contents into documentation or Git.
 20. POKEMON RELEASE MONITOR
 ============================================================
 
-2026-09-17: 27-store monitor active and enabled for autostart.
+2026-09-21: 32-store monitor active and enabled for autostart.
 No manual start is normally needed after reboot. Pushover HIGH test accepted
 once; no repeat test is needed. Never send keys in chat or commit them.
 
@@ -690,7 +690,8 @@ Runtime directory is 700; environment must be 600; both owned by kaian.
 Service uses Node v24.21.0 at an absolute path and built dist/cli.js; no shell
 profile is needed. Only 30th Celebration notifications, no purchases.
 Polling targets 90 +/- 15 seconds between starts per store, staggered starts,
-maximum 3 concurrent store jobs. Per-store errors/backoff do not stop other stores.
+maximum 3 concurrent store jobs. Oldest-due jobs receive available capacity first;
+actual intervals can be longer while busy. Per-store errors/backoff do not stop other stores.
 A zero count means no matching products on the verified discovery surface.
 If one store fails, inspect its status/backoff and journal before taking action.
 Never delete SQLite to repair a transient error; never bypass any store's 403/429.
@@ -699,7 +700,7 @@ Do not run another monitor:once or monitor alongside the active service.
 Store coverage, disabled reasons and parser methods:
 /home/kaian/apps/PokemonReleaseMonitor/docs/STORES.md
 
-For the prepared 2026-09-21 store wave, exact deployment and same-schema rollback:
+For the completed 2026-09-21 store wave, exact deployment and same-schema rollback:
 changes/2026-09-21-pokemon-store-wave2.md
 /home/kaian/nas-admin/scripts/pokemon-monitor-deploy-wave2
 

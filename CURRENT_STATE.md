@@ -338,49 +338,40 @@ Currently installed/configured:
 
 ## PokemonReleaseMonitor
 
-- Application: /home/kaian/apps/PokemonReleaseMonitor, clean main at
-  e3df485f8fb77221cb4f4b916646a188e138c5fb; feature/main pushed to verified origin.
-- Node v24.21.0 / npm 11.19.0 under ~/.local/opt; node/npm/npx symlinks under
-  ~/.local/bin. npm ci, lint, typecheck, 117 fixture tests and build passed.
-- Notification-only monitoring of Pokemon TCG: 30th Celebration. 60 stores
-  researched, 27 enabled and 33 deferred; full list and reasons in app docs/STORES.md.
-  Priority stores Cardcenter, Outland, Pokestore, Collectible and Ringo enabled;
-  ARK, Norli and Extra Leker await reliable discovery/online-stock parsing.
-- Production snapshot: 123 relevant products; Cardcenter 22 preserved. IndigoTCG
-  reports two available products (placeholder prices/unspecified language),
-  LittleM six and Kortbakeren seven open preorders. Initial per-store baselines
-  are silent; zero product notifications at post-deployment verification.
-- Polling targets 90 +/- 15 seconds between starts per store, staggered across
-  stores, maximum three concurrent jobs with sequential HTTP inside each job.
-  Errors/backoff are isolated per store. No browser or purchasing functionality.
-- Runtime: /home/kaian/.local/share/pokemon-release-monitor (700 kaian:kaian),
-  SQLite schema 2, per-store last-poll snapshots and logs/monitor.log (600).
-  Transactional migration preserved original Cardcenter records/history/baseline;
-  integrity and foreign-key checks passed. Fresh pre-migration backup:
-  backups/pre-multistore-deploy-20260917T203625Z.sqlite under runtime.
-- Environment: /home/kaian/.config/pokemon-release-monitor/env, 600 kaian:kaian;
-  both Pushover keys non-empty and outside Git. Product events use priority 1;
-  normal test uses 0; emergency priority 2 is never used. Exactly one homelab
-  HIGH test accepted HTTP 200 / API status 1 / priority 1 at 20:22:35 UTC.
-  iPhone reception/presentation requires the user's own confirmation.
-- pokemon-release-monitor.service enabled and active as kaian, restarted for
-  deployment at 2026-09-17 22:36:27 CEST. Absolute Node path, built CLI,
-  private umask, restart-on-failure and network-online.target unchanged.
-  All 27 stores completed at least three successful polls; no errors, 403/429,
-  crash loop or duplicate/bootstrap pushes. NRestarts=0. No reboot performed.
-- Initial resource observation: about 301 MiB service RAM, 314 MiB peak,
-  5.3% of one CPU core average, 8.9 MiB SQLite plus WAL, 475 KiB logs.
-- Production per-store status: /home/kaian/.local/bin/pokemon-monitor.
-- Latest record, validation and schema-aware rollback:
-  changes/2026-09-17-pokemon-multistore-high-priority.md.
-  Initial installation: changes/2026-09-17-pokemon-release-monitor-deployment.md.
-
-### PokemonReleaseMonitor store wave in observation (2026-09-21)
-
-- Production switched to 371e7be at 18:10:18 UTC, five new stores imported silently.
-- Final reviewed app 9cc913ac8860cd4c0dd6d1451f4cc979a972c354 is pushed to main;
-  follow-up exact deployment fixes measured fixed-order scheduler starvation.
-- Norli, Extra Leker, Cardstore, MaxGaming Norway, LABOGE passed 142 tests/live
-  checks; 32 stores enabled. ARK remains deferred. No notifier/schema change.
-- Exact deployment, observation and rollback:
-  changes/2026-09-21-pokemon-store-wave2.md; script scripts/pokemon-monitor-deploy-wave2.
+- App: /home/kaian/apps/PokemonReleaseMonitor, clean main at
+  9cc913ac8860cd4c0dd6d1451f4cc979a972c354; feature/main pushed without force.
+- Node 24.21.0/npm 11.19.0 unchanged. npm ci, lint, typecheck, 142 tests/build pass.
+- 32 enabled stores / 28 deferred from the existing 60-store register. Added Norli,
+  Extra Leker, Cardstore, MaxGaming Norway, LABOGE on 2026-09-21. ARK remains
+  deferred: online/store stock split verified, complete bounded discovery unverified.
+- New allowed target counts: Norli 5, Extra Leker 0, Cardstore 20, MaxGaming 7,
+  LABOGE 10. Three additional MaxGaming foreign-language products are blocked.
+  No allowed target was available/open preorder during validation. Counts are snapshots.
+- Only Pokemon TCG: 30th Celebration; original language filter/default-unknown
+  handling preserved. No purchasing, cart/checkout requests, browser, login or bypass.
+- Polling target 90 +/- 15 seconds, concurrency three, sequential HTTP >=1 second,
+  initial stagger across 90 seconds. Oldest-due job now wins capacity to prevent
+  measured fixed-order starvation. Actual intervals can exceed the target under load.
+- Runtime /home/kaian/.local/share/pokemon-release-monitor (700 kaian), schema 2.
+  All 442 pre-wave product records/identities and 340 notifications preserved.
+  Current 487 product rows; notification rows remained 340 through verification.
+  Exactly five silent baselines; no repeats on the fairness restart, no duplicate push.
+- SQLite integrity/FK checks ok; no schema migration. Fresh final backup:
+  backups/pre-wave2-20260921T182016Z.sqlite under runtime. Original wave backup
+  backups/pre-wave2-20260921T181016Z.sqlite also retained; receipts deploy-wave2.json
+  and deploy-wave2-371e7be.json. Keep runtime/database on rollback to e3df485.
+- Pushover env /home/kaian/.config/pokemon-release-monitor/env remains mode 600,
+  unchanged. NEW_PRODUCT/IN_STOCK/PREORDER_OPEN priority=1. No test alert this phase.
+- pokemon-release-monitor.service active/enabled as kaian; final start
+  2026-09-21 18:20:18 UTC, NRestarts=0. Two planned deploy restarts;
+  no crash restart. Unit/ExecStart/network-online/autostart unchanged.
+- All five additions completed >=3 successful polls after final restart. All 26
+  previously healthy stores succeeded. Existing PokeNordic HTTP 429/backoff persists;
+  it predated this change. No new poll/parser/notification errors or rate-limit storm.
+- Final resource snapshot: 363.78 MiB service RAM,
+  5.67% of one core sampled; SQLite 12.29 MiB plus WAL,
+  rotated logs about 2.92 MiB total.
+  Before this phase: ~404 MiB / 3.54%; historical rollout: 301 MiB / 5.3%.
+- Status: /home/kaian/.local/bin/pokemon-monitor. Current deployment, QA, direct
+  evidence and rollback: changes/2026-09-21-pokemon-store-wave2.md.
+  Historical schema migration: changes/2026-09-17-pokemon-multistore-high-priority.md.

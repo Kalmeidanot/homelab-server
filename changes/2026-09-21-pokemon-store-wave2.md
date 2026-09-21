@@ -1,9 +1,8 @@
 # PokemonReleaseMonitor: second production store wave
 
 Date: 2026-09-21.
-Status: first switch completed at 18:10 UTC; follow-up scheduler fairness fix
-prepared after production observation exposed delayed polls. Final three-cycle
-observation remains pending the exact-target follow-up deployment.
+Status: deployed and verified at 2026-09-21T18:27:10.972195+00:00. All five additions completed
+at least three successful polls after the final scheduler-fairness restart.
 
 ## Purpose and commits
 
@@ -17,8 +16,8 @@ requests, login, payment, browser, anti-bot bypass, price comparison or social m
 - Branch `feature/store-wave2`, separate worktree
   `/home/kaian/apps/PokemonReleaseMonitor-wave2`.
 - Feature branch pushed, remote main advanced by verified fast-forward without
-  force. Production checkout remains old main until the service is stopped by
-  the exact-target deployment script.
+  force. Both production updates used the stopped-service exact-target script;
+  final checkout is clean main at 9cc913a.
 - App remote verified: https://github.com/Kalmeidanot/PokemonReleaseMonitor.git.
 - Server-management remote verified: Kalmeidanot/homelab-server (existing SSH alias).
 
@@ -143,10 +142,7 @@ Rollback has not been executed.
 
 ## Post-deployment observation
 
-Follow-up deployment pending. Required: >=3 successful polls per addition, service
-active/enabled, NRestarts, all old-store health, zero new-store bootstrap/duplicate
-notifications, no new 403/429/parser storm, SQLite integrity/FK and resource snapshot.
-Record actual receipt/backup/service start and results below before calling deployed.
+Final verified observation follows the first-switch history below.
 
 ### First switch and scheduler correction
 
@@ -167,5 +163,77 @@ main updated by fast-forward. No changes experimented on the running checkout.
 
 Updated exact-target script accepts e3df485 or the intermediate 371e7be, archives
 the first deployment receipt, takes another consistent backup and deploys 9cc913a.
-Final observation must restart its three-cycle count after this service restart.
+Final observation restarted its three-cycle count after this service restart.
 Both restarts are planned deploys; NRestarts counts automatic failure restarts.
+
+### Final deployment and verified outcome
+
+Final app **9cc913ac8860cd4c0dd6d1451f4cc979a972c354**, clean main, matching origin.
+User ran the updated script; service start **2026-09-21 18:20:18 UTC**. New backup:
+`/home/kaian/.local/share/pokemon-release-monitor/backups/pre-wave2-20260921T182016Z.sqlite`.
+Second receipt records 487 products / 340 notifications / schema 2 before restart.
+First receipt is archived as runtime/deploy-wave2-371e7be.json; current receipt is
+runtime/deploy-wave2.json. Both backups/receipts retained, mode 600 under private runtime.
+
+Verified at 2026-09-21T18:27:10.972195+00:00: service active, autostart enabled, **NRestarts=0**.
+Two planned deploy restarts occurred (adapters, then measured fairness correction);
+there were no automatic crash restarts.
+
+| Added store | Successful polls after final restart | Observed start intervals (seconds) |
+| --- | ---: | --- |
+| norli | 3 | 99.1, 115.1, 103.1 |
+| extra-leker | 3 | 100.1, 102.1, 88.1 |
+| cardstore | 3 | 108.1, 102.1 |
+| maxgaming | 3 | 105.1, 96.1, 102.1 |
+| laboge | 3 | 109.1, 95.1, 100.1 |
+
+Completed-poll counts were captured at 18:26:09 UTC; start intervals include
+additional starts through the final 18:27:10 UTC integrity verification.
+
+Exactly five silent baselines were imported in the first deployment, including
+Extra Leker's verified empty target set. The final restart imported none again;
+all original and new baseline timestamps are preserved. New-store notification
+rows remain **zero**, and the full notification history remains **340**, so there
+were no baseline pushes or duplicate notifications during either observation.
+All 442 pre-wave product IDs/URLs/first-seen values and all 340 prior notification
+rows were compared with the initial SQLite backup and remain intact. Current
+products total 487: 42 allowed additions and 3 language-blocked MaxGaming entries.
+Schema remains 2, integrity_check=ok, foreign_key_check empty. No migration/reset.
+
+All 26 previously healthy stores also completed successful polls after the final
+restart. PokeNordic remains the pre-existing HTTP 429/backoff exception (last good
+poll 17:35 UTC); it was not retried during this observation because its persistent
+backoff extends to 18:29 UTC. No newly failed store, parser mismatch, 403/429 storm,
+timeout or notification failure was logged during final observation.
+
+Target remains 90 +/- 15 seconds, concurrency three, stagger and request spacing
+unchanged. Actual intervals above include waiting for capacity, so they can exceed
+105 seconds. Oldest-due scheduling eliminated fixed-order starvation: initial
+Cardstore start fell from 214 seconds to 97 seconds, MaxGaming to 101 seconds.
+No claim is made that the target interval is a hard deadline under workload.
+
+Resource snapshot: service RAM **363.78 MiB**; sampled CPU
+**5.67% of one core** during final observation. Compare initial
+rollout 301 MiB / 5.3% and this phase's before state ~404 MiB / 3.54%. No dramatic
+CPU/RAM increase was observed; this is a short observation, not a long-run bound.
+
+| Runtime file | Bytes | MiB |
+| --- | ---: | ---: |
+| state.sqlite-wal | 4680352 | 4.46 |
+| state.sqlite-shm | 32768 | 0.03 |
+| state.sqlite | 12886016 | 12.29 |
+| monitor.log | 1061254 | 1.01 |
+| monitor.log.1 | 2000131 | 1.91 |
+
+SQLite grew from 9.14 MiB to about 12.29 MiB, principally retained sightings from
+MaxGaming's Norwegian sitemap; application logs remain under the existing rotation
+limit. Current CPU/RAM and data integrity need no OS/service configuration changes.
+
+QA: npm ci, lint, typecheck, 142 tests and build passed; actual isolated/public
+validation and final production observation both passed. Pushover priority=1 and
+credentials unchanged; no test alert. Runtime permissions and backup mode checked.
+Rollback target remains **e3df485f8fb77221cb4f4b916646a188e138c5fb**, preserving the
+current schema-2 database. No rollback was required or performed.
+
+App evidence: [store decisions](https://github.com/Kalmeidanot/PokemonReleaseMonitor/blob/9cc913ac8860cd4c0dd6d1451f4cc979a972c354/docs/STORES.md)
+and [methods, product URLs/prices/statuses](https://github.com/Kalmeidanot/PokemonReleaseMonitor/blob/9cc913ac8860cd4c0dd6d1451f4cc979a972c354/docs/WAVE2_VALIDATION.md).
