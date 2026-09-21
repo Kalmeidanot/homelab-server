@@ -715,9 +715,9 @@ No migration/restart needed for these side commands. Model and current audit:
 Exact price CLI deployment and code-only rollback:
 changes/2026-09-21-pokemon-canonical-prices.md
 
-Global Rip & Ship/opening-service exclusion is prepared, awaiting its controlled
-restart deployment. The price tool already excludes these; the new shared policy
-also removes them from status and all monitor notifications. Mixed Shopify pages
+Global Rip & Ship/opening-service exclusion is active since 2026-09-21 20:06 UTC.
+The shared purchase-mode policy excludes these from normal price/status views
+and all monitor notifications. Mixed Shopify pages
 use only explicit sealed variant stock/price. Deployment status and rollback:
 changes/2026-09-21-pokemon-opening-exclusion.md
 /home/kaian/nas-admin/scripts/pokemon-monitor-deploy-opening-filter

@@ -1,7 +1,7 @@
 # PokemonReleaseMonitor: global opening-service exclusion
 
-Date: 2026-09-21. Status: implemented, tested and published; awaiting the user's
-interactive deployment command. Production has not yet been restarted or changed.
+Date: 2026-09-21. Status: deployed at 20:06:06 UTC using the user-run controlled
+restart script. Post-deploy evidence is recorded below.
 
 ## Purpose and exact commits
 
@@ -9,12 +9,12 @@ The user never wants Rip & Ship/live-opening/break services. Exclude them global
 from relevance, online availability, preorder, all three existing notification
 types and canonical price views. Preserve real sealed choices on mixed pages.
 
-- Production app / rollback: **18fd2bf4b87bc926d96d2591d2371a50c233bb0d**.
+- Previous app / rollback: **18fd2bf4b87bc926d96d2591d2371a50c233bb0d**.
 - Reviewed new app: **e54abfca13e27b03cc470cd7e517b76a3441856a**.
 - Branch: feature/opening-exclusion, worktree
   /home/kaian/apps/PokemonReleaseMonitor-opening.
 - Feature/main published through non-force fast-forward. Production checkout
-  remains clean main at 18fd2bf until the stopped-service script advances it.
+  is clean main at e54abfc after the stopped-service script advanced it.
 - App: /home/kaian/apps/PokemonReleaseMonitor.
 - Runtime: /home/kaian/.local/share/pokemon-release-monitor.
 - Service: pokemon-release-monitor.service. No unit, OS, scheduler, store enablement,
@@ -102,7 +102,7 @@ npm ci/build, reclassifies twice without notifier/network, checks history/schema
 integrity/baselines, then starts the service. Failure leaves explicit rollback
 instructions. Already-target checkout is not blindly deployed again.
 
-Required terminal command, as kaian:
+Executed terminal command, as kaian:
 
 ```sh
 /home/kaian/nas-admin/scripts/pokemon-monitor-deploy-opening-filter
@@ -112,11 +112,11 @@ Reason for user action: `sudo -n -l` returns “interactive authentication is re
 No password is requested by or passed through Codex. The restart is necessary
 because the running monitor must load the changed parsers/state/policy modules.
 
-Receipt: runtime/deploy-opening-filter.json. Backup:
-runtime/backups/pre-opening-filter-<UTC timestamp>.sqlite. Schema remains 2.
-After the user confirms completion: inspect receipt, observe 2–3 poll cycles,
-check active/enabled/NRestarts, healthy stores, no new parser failures or service
-pushes, normal sealed products, CLI views, integrity/FK and preserved history.
+Receipt: runtime/deploy-opening-filter.json, status started. Consistent backup:
+runtime/backups/pre-opening-filter-20260921T200604Z.sqlite. It contains 490 products
+and 347 notifications (one ordinary notification was added before deployment,
+after the earlier 346-row research snapshot). Schema remains 2. Both stopped-service
+reclassification passes found 16 rows; startup also confirmed 16 blocked rows.
 
 ## Rollback
 
@@ -142,5 +142,40 @@ existing product/store identities are never rolled back to an older DB snapshot.
 
 ## Post-deploy outcome
 
-Pending user-run deployment. Do not describe the production monitor as hardened
-until the new commit is running and post-deploy observation is completed.
+Observed 20:06:06–20:12:08 UTC. Service active/running and enabled, PID 1782936,
+NRestarts=0. One planned restart to load the new code; no unexpected restart.
+All 31 previously healthy stores completed at least three successful polls.
+PokeNordic remains in its pre-existing HTTP 429 backoff (last error 19:27 UTC,
+next allowed attempt 20:15:14 UTC); its backoff was respected, not reset. No new
+poll/parser errors, 403/429 storm, or notification-delivery errors in this window.
+
+Successful poll counts: cardcenter=3, outland=4, pokestore=4, collectible=4, ringo=4, manaheim=4, altakube=3, gameandtrade=3, retroworld=3, pokelageret=3, indigotcg=3, littlemtcg=3, boosterkongen=3, epicards=3, braspill=3, mythic=3, laboge=3, pokenordic=0, maeddiiss=3, pokebua=3, packsofnorway=3, cardchimp=3, tcgnorge=3, collectorscorner=3, pokelink=3, kortix=3, cardsailor=3, playlot=3, norli=3, extra-leker=3, cardstore=3, maxgaming=3.
+
+All 16 opening-service rows remain irrelevant, unknown availability, non-orderable,
+with null prices. No opening-service notifications were created or sent. Normal
+products continue to be discovered: LABOGE has eight retained ordinary targets;
+Kortbakeren's ordinary character-option products remain eligible. One new normal
+Braspill ETB was discovered at 20:07:16 and generated the usual NEW_PRODUCT event
+at 20:07:17 (notification 348). This was not a test, policy-reclassification event,
+or an opening product. A new Japanese Kortjungelen Premium Deck Set was stored
+with its language block and generated no notification. Accordingly, this report
+does not claim that the ongoing monitor sent zero ordinary alerts.
+
+Final SQLite snapshot: **492 products / 348 notifications**, schema 2; integrity
+OK, foreign_key_check empty. All 490 original product IDs/URLs/first-seen timestamps,
+all previously sent notification records and all 32 store baselines were compared
+against the deploy backup and preserved. No database migration, deletion or reset.
+
+Installed pokemon-monitor status/cheapest/prices/prices --json all ran successfully.
+Neither normal price command includes any of the 16 service URLs; JSON audit retains
+all 16 as EXCLUDED, null price, non-orderable and ineligible for either ranking.
+Price snapshot at 20:09:29 UTC: 22 canonical, 143 mapped, 242 unmapped, 38 review,
+69 excluded, 20 products at 2+ stores (492 listings). Counts vary with normal polls.
+Shared sealed-variant stock/price rules are covered by fixtures; no actual mixed
+sealed/opening variant array was confirmed during bounded live checks.
+
+Service resource snapshot at 20:11:27 UTC: 335.0 MiB RAM; accumulated CPU 19.38 s
+across approximately 321 s uptime (~6.0% of one core including startup). SQLite
+12.31 MiB, with WAL retained. No service/scheduler/Pushover configuration changed.
+Deployment receipt, backup and local read-only observation evidence are retained;
+no secrets are included in this record.

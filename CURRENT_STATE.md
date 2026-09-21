@@ -339,8 +339,8 @@ Currently installed/configured:
 ## PokemonReleaseMonitor
 
 - App: /home/kaian/apps/PokemonReleaseMonitor, clean main at
-  18fd2bf4b87bc926d96d2591d2371a50c233bb0d; feature/main pushed without force.
-- Node 24.21.0/npm 11.19.0 unchanged. npm ci, lint, typecheck, 236 tests/build pass.
+  e54abfca13e27b03cc470cd7e517b76a3441856a; feature/main pushed without force.
+- Node 24.21.0/npm 11.19.0 unchanged. npm ci, lint, typecheck, 319 tests/build pass.
 - 32 enabled stores / 28 deferred from the existing 60-store register. Added Norli,
   Extra Leker, Cardstore, MaxGaming Norway, LABOGE on 2026-09-21. ARK remains
   deferred: online/store stock split verified, complete bounded discovery unverified.
@@ -405,14 +405,26 @@ Currently installed/configured:
   notifications. RIP & SHIP titles correctly excluded by the new price matcher.
   Initial app audit is timestamped 19:01:43; later delta is in the server record.
 
-### Opening-service exclusion prepared (2026-09-21)
+### Global opening-service exclusion (2026-09-21)
 
-- Reviewed app e54abfca13e27b03cc470cd7e517b76a3441856a published to feature/main;
-  production still runs 18fd2bf until the exact restart deployment is executed.
-- Shared purchase-mode policy; explicit sealed-only Shopify stock/price on mixed
-  pages; 16 old service listings found at six stores. Schema remains 2; historical
-  notifications retained. 319 tests/lint/typecheck/build passed.
-- User terminal action required because sudo needs interactive authentication:
-  /home/kaian/nas-admin/scripts/pokemon-monitor-deploy-opening-filter
-- Backup, restart, state checks, post-observation and rollback to 18fd2bf:
+- Deployed app e54abfca13e27b03cc470cd7e517b76a3441856a at 20:06:06 UTC via
+  scripts/pokemon-monitor-deploy-opening-filter; clean main, published without force.
+- Shared purchase-mode policy excludes opening services from relevance, stock,
+  notifications and price ranking. Mixed Shopify pages use only explicit sealed
+  variant stock/price; incomplete mixed data stays under review.
+- 16 stored services blocked across six stores; pure service details rechecked
+  daily, mixed/review products polled normally. Normal LABOGE target count now 8.
+- Service active/enabled, PID 1782936, NRestarts=0. One planned restart. By 20:12:08
+  UTC all 31 previously healthy stores had >=3 successful polls. PokeNordic's old
+  429/backoff remains; no new poll/parser errors or opening-service alerts.
+- One ordinary new Braspill ETB triggered NEW_PRODUCT. Current database 492 products /
+  348 notifications; all deploy-backup product identities, sent history and 32
+  baselines preserved. Integrity/FK OK; unchanged schema 2, metadata-only policy.
+- Both normal price commands hide all 16 service URLs; JSON keeps excluded audit
+  rows. Snapshot: 143 mapped / 242 unmapped / 38 review / 69 excluded; 22 canonical.
+- npm ci, lint, typecheck, 319 tests and build passed. Resource snapshot: 335 MiB
+  RAM; ~6.0% of one core averaged across first 321 seconds including startup.
+- Backup runtime/backups/pre-opening-filter-20260921T200604Z.sqlite. Code rollback
+  18fd2bf retains runtime/history but restores the old opening-filter limitation.
+- Complete audit, deployment, observation and rollback:
   changes/2026-09-21-pokemon-opening-exclusion.md.
