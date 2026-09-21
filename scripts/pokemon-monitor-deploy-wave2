@@ -1,0 +1,71 @@
+#!/bin/bash
+# Exact reviewed, schema-preserving update. Run as kaian in a server terminal.
+set +x
+set -euo pipefail
+umask 077
+export PATH=/home/kaian/.local/opt/node-v24.21.0-linux-x64/bin:/usr/local/bin:/usr/bin:/bin
+app=/home/kaian/apps/PokemonReleaseMonitor
+runtime=/home/kaian/.local/share/pokemon-release-monitor
+previous=e3df485f8fb77221cb4f4b916646a188e138c5fb
+target=371e7be04c642c734c0e524b540b10b3b3f69aba
+[[ $(id -un) == kaian ]] || { echo 'Run as kaian, not root.' >&2; exit 1; }
+cd "$app"
+[[ $(git remote get-url origin) == https://github.com/Kalmeidanot/PokemonReleaseMonitor.git ]]
+[[ $(git branch --show-current) == main ]]
+[[ -z $(git status --porcelain) ]]
+if [[ $(git rev-parse HEAD) == "$target" ]]; then
+  echo 'Target checkout already present. Inspect receipt and service; do not repeat deployment.'
+  systemctl status pokemon-release-monitor.service --no-pager
+  exit 0
+fi
+[[ $(git rev-parse HEAD) == "$previous" ]] || { echo 'Unexpected starting commit.' >&2; exit 1; }
+git fetch origin
+[[ $(git rev-parse origin/main) == "$target" ]] || { echo 'Remote differs from reviewed target.' >&2; exit 1; }
+git merge-base --is-ancestor HEAD "$target"
+# Interactive authentication happens only here, in the user's terminal.
+sudo -v
+sudo systemctl stop pokemon-release-monitor.service
+[[ $(systemctl is-active pokemon-release-monitor.service || true) == inactive ]]
+trap 'echo "Update stopped on error. Keep runtime/state. Follow the wave-two rollback in nas-admin/changes/2026-09-21-pokemon-store-wave2.md." >&2' ERR
+python3 - <<'PY'
+import sqlite3,datetime,json
+from pathlib import Path
+r=Path('/home/kaian/.local/share/pokemon-release-monitor')
+s=sqlite3.connect(f'file:{r}/state.sqlite?mode=ro',uri=True)
+assert s.execute('pragma user_version').fetchone()[0]==2
+assert s.execute('pragma integrity_check').fetchone()[0]=='ok'
+assert not s.execute('pragma foreign_key_check').fetchall()
+b=r/'backups'/('pre-wave2-'+datetime.datetime.now(datetime.UTC).strftime('%Y%m%dT%H%M%SZ')+'.sqlite')
+assert not b.exists()
+backup=sqlite3.connect(b);s.backup(backup)
+assert backup.execute('pragma integrity_check').fetchone()[0]=='ok';backup.close()
+receipt={'prepared_at':datetime.datetime.now(datetime.UTC).isoformat(),'old_commit':'e3df485f8fb77221cb4f4b916646a188e138c5fb','new_commit':'371e7be04c642c734c0e524b540b10b3b3f69aba','backup':str(b),'products':s.execute('select count(*) from products').fetchone()[0],'notifications':s.execute('select count(*) from notifications').fetchone()[0],'schema':2,'status':'backed_up'}
+(r/'deploy-wave2.json').write_text(json.dumps(receipt,indent=2)+'\n');s.close()
+print('Consistent schema-2 backup:',b)
+PY
+git merge --ff-only "$target"
+npm ci
+npm run build
+# Validate that installation/build did not change persisted state, schema or history.
+python3 - <<'PY'
+import sqlite3,json
+from pathlib import Path
+r=Path('/home/kaian/.local/share/pokemon-release-monitor');receipt=json.loads((r/'deploy-wave2.json').read_text())
+s=sqlite3.connect(f'file:{r}/state.sqlite?mode=ro',uri=True)
+assert s.execute('pragma user_version').fetchone()[0]==2
+assert s.execute('pragma integrity_check').fetchone()[0]=='ok'
+assert s.execute('select count(*) from products').fetchone()[0]==receipt['products']
+assert s.execute('select count(*) from notifications').fetchone()[0]==receipt['notifications']
+print('Database/history preserved; no schema migration.')
+PY
+sudo systemctl start pokemon-release-monitor.service
+systemctl is-enabled pokemon-release-monitor.service
+systemctl is-active pokemon-release-monitor.service
+python3 - <<'PY'
+import json,datetime
+from pathlib import Path
+p=Path('/home/kaian/.local/share/pokemon-release-monitor/deploy-wave2.json');d=json.loads(p.read_text());d.update(status='started',started_at=datetime.datetime.now(datetime.UTC).isoformat());p.write_text(json.dumps(d,indent=2)+'\n')
+PY
+systemctl status pokemon-release-monitor.service --no-pager
+trap - ERR
+echo 'Wave two deployed. Codex must now verify at least three polls for each new store.'

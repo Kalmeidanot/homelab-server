@@ -699,7 +699,11 @@ Do not run another monitor:once or monitor alongside the active service.
 Store coverage, disabled reasons and parser methods:
 /home/kaian/apps/PokemonReleaseMonitor/docs/STORES.md
 
-For updates and schema-aware rollback see:
+For the prepared 2026-09-21 store wave, exact deployment and same-schema rollback:
+changes/2026-09-21-pokemon-store-wave2.md
+/home/kaian/nas-admin/scripts/pokemon-monitor-deploy-wave2
+
+Historical schema migration / single-store rollback:
 changes/2026-09-17-pokemon-multistore-high-priority.md
 Stop service before updating, back up SQLite before schema changes, use clean
 main / git pull --ff-only, npm ci and full lint/typecheck/test/build before
