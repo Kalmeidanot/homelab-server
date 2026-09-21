@@ -1,8 +1,9 @@
 # PokemonReleaseMonitor: second production store wave
 
 Date: 2026-09-21.
-Status: code/fixtures/live validation complete; exact deployment prepared, awaiting
-user-run interactive sudo. The original 27-store service continues to run.
+Status: first switch completed at 18:10 UTC; follow-up scheduler fairness fix
+prepared after production observation exposed delayed polls. Final three-cycle
+observation remains pending the exact-target follow-up deployment.
 
 ## Purpose and commits
 
@@ -11,7 +12,8 @@ Norway and LABOGE for Pokémon TCG: 30th Celebration. No purchasing, cart/checko
 requests, login, payment, browser, anti-bot bypass, price comparison or social monitoring.
 
 - Old app / rollback: `e3df485f8fb77221cb4f4b916646a188e138c5fb`.
-- Reviewed new app: `371e7be04c642c734c0e524b540b10b3b3f69aba`.
+- First deployed app: `371e7be04c642c734c0e524b540b10b3b3f69aba`.
+- Final reviewed app: `9cc913ac8860cd4c0dd6d1451f4cc979a972c354`.
 - Branch `feature/store-wave2`, separate worktree
   `/home/kaian/apps/PokemonReleaseMonitor-wave2`.
 - Feature branch pushed, remote main advanced by verified fast-forward without
@@ -78,7 +80,7 @@ sum to 42. Full direct product URLs/prices/statuses in app docs/WAVE2_VALIDATION
 
 ## QA and isolated live validation
 
-npm ci, lint, typecheck, **141 tests**, build passed. Original 117 tests retained.
+npm ci, lint, typecheck, **142 tests**, build passed. Original 117 tests retained.
 Fixtures include actual public-data parsing per store, complete discovery, prices,
 available/sold-out/preorder/unknown, wrong set, language blocks, and independent silent
 baselines. Extra physical-online discrepancy and Norli GraphQL contract are explicit.
@@ -91,8 +93,9 @@ Fresh positive/negative controls verified separately. No candidate HTTP 403/429 
 MaxGaming initially failed closed on unrelated SCART URL substring and missing
 optional metadata; both fixed and retested before activation. No partial baseline.
 
-Scheduler, global matching/language, notifier, state, existing adapters, dependencies
-and Pushover config are unchanged. All product events remain priority=1. No test push.
+Global matching/language, notifier, state, existing adapters, dependencies and
+Pushover config are unchanged. Scheduler fairness was changed only after measured
+production starvation; see the observation below. All product events remain priority=1. No test push.
 90 +/- 15 seconds per store, max three jobs, >=1 second sequential request spacing,
 stagger over 90 seconds (~2.8 seconds/store). Existing failure isolation/backoff reused.
 The five stores add 55 requests per observed full round; no startup burst introduced.
@@ -140,7 +143,29 @@ Rollback has not been executed.
 
 ## Post-deployment observation
 
-Pending user-run script. Required: >=3 successful polls per addition, service
+Follow-up deployment pending. Required: >=3 successful polls per addition, service
 active/enabled, NRestarts, all old-store health, zero new-store bootstrap/duplicate
 notifications, no new 403/429/parser storm, SQLite integrity/FK and resource snapshot.
 Record actual receipt/backup/service start and results below before calling deployed.
+
+### First switch and scheduler correction
+
+User ran the initial script; service started 2026-09-21 18:10:18 UTC on 371e7be.
+Backup: runtime/backups/pre-wave2-20260921T181016Z.sqlite; 442 original product
+records and 340 notification records preserved, no schema migration. All five new
+stores imported exactly one silent baseline. No new-store notifications or errors.
+
+Production observation exposed fixed-array-order scheduler starvation under load:
+Norli's first poll started 127 seconds after service start; Cardstore's first poll
+started 214 seconds after start. Norli/Extra then waited over three minutes while
+earlier stores repeatedly got free slots. This is the concrete reason a scheduler
+change became necessary. Final scheduler selects **oldest due time** before starting
+one job per second; concurrency=3, stagger, jitter, backoff and no-overlap unchanged.
+A saturation regression test exercises continuous scheduling, not only once mode.
+All 142 tests/lint/typecheck/build passed before publishing the fix. App feature and
+main updated by fast-forward. No changes experimented on the running checkout.
+
+Updated exact-target script accepts e3df485 or the intermediate 371e7be, archives
+the first deployment receipt, takes another consistent backup and deploys 9cc913a.
+Final observation must restart its three-cycle count after this service restart.
+Both restarts are planned deploys; NRestarts counts automatic failure restarts.

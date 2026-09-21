@@ -375,13 +375,12 @@ Currently installed/configured:
   changes/2026-09-17-pokemon-multistore-high-priority.md.
   Initial installation: changes/2026-09-17-pokemon-release-monitor-deployment.md.
 
-### Prepared PokemonReleaseMonitor store wave (2026-09-21)
+### PokemonReleaseMonitor store wave in observation (2026-09-21)
 
-- Reviewed app 371e7be04c642c734c0e524b540b10b3b3f69aba is pushed to main;
-  production checkout/service still runs e3df485 until the exact deploy script runs.
-- Norli, Extra Leker, Cardstore, MaxGaming Norway, LABOGE passed 141 tests and
-  isolated read-only live validation; config enables 32 stores. ARK remains deferred.
-- Deployment/rollback and post-deploy checklist:
+- Production switched to 371e7be at 18:10:18 UTC, five new stores imported silently.
+- Final reviewed app 9cc913ac8860cd4c0dd6d1451f4cc979a972c354 is pushed to main;
+  follow-up exact deployment fixes measured fixed-order scheduler starvation.
+- Norli, Extra Leker, Cardstore, MaxGaming Norway, LABOGE passed 142 tests/live
+  checks; 32 stores enabled. ARK remains deferred. No notifier/schema change.
+- Exact deployment, observation and rollback:
   changes/2026-09-21-pokemon-store-wave2.md; script scripts/pokemon-monitor-deploy-wave2.
-- No schema/Pushover/scheduler change. Existing PokeNordic 429 backoff was observed
-  before this wave; 26 other enabled stores healthy at pre-flight.
