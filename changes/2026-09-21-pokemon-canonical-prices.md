@@ -150,3 +150,25 @@ Verified **2026-09-21T19:07:17.924755+00:00**:
 Useful working evidence (outside Git): ~/.cache/pokemon-prices/postcheck.json,
 deployed-cheapest.txt, deployed-binder.txt, deployed-audit.json. Full public product
 and mapping evidence is committed in the app audit; no secrets are in either repo.
+
+### Subsequent normal monitoring event (19:07:43 UTC)
+
+After the completed 19:07:17 verification, the unchanged running monitor discovered
+an available Cardero ETB `[RIP&SHIP SPECIAL]` and an existing Booster Pack restock.
+It sent the existing NEW_PRODUCT and IN_STOCK notifications (IDs 346/345), with
+normal poll timestamps 19:07:43.557 UTC. These were **ordinary monitor events**, not
+price-command notifications; the same monitor PID has run since before deployment.
+No price event or notifier change exists in this release. Do not report zero total
+production notifications over the extended observation interval.
+
+The Booster title is now also marked RIP & SHIP. The conservative canonical rule
+correctly moves that previously mapped row to REVIEW_REQUIRED and excludes the
+new service listing too. Latest audit at 19:08 UTC: **490 persisted rows, 143 mapped,
+242 unmapped, 52 review-required, 53 language-excluded; 22 canonical products and
+20 at 2+ stores**. All six price examples above remain unchanged. The app audit
+is explicitly timestamped 19:01:43 and retains its valid earlier 489/144/50 snapshot.
+
+All 489 pre-deployment product identities, 344 original notification rows and 32
+baselines remain preserved. Current notification total is 346 because of the two
+ordinary events. Read-only commands neither suppressed nor produced these events.
+Integrity/FK checks remain OK; all 31 healthy stores continue polling, no new errors.

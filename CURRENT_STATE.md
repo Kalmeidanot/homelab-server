@@ -382,8 +382,8 @@ Currently installed/configured:
 - `pokemon-monitor cheapest [filter]` and `pokemon-monitor prices [filter]` now
   available; `prices --json` exports the complete audit. Product price excludes
   shipping; no new notifications, scraping, purchase or web dashboard.
-- Deterministic config/canonical-products.json: 22 identities; snapshot 144 mapped
-  listings, 242 unmapped individual-card rows, 50 review-required, 53 language-blocked.
+- Deterministic config/canonical-products.json: 22 identities; latest snapshot 143
+  mapped listings, 242 unmapped individual-card rows, 52 review-required, 53 language-blocked.
   20 canonical products at 2+ stores. Combined variants/services remain unranked.
 - Valid NOK >1, <=10-minute freshness with matching product/store observation time.
   Actionable requires available/open preorder, orderable and no store error.
@@ -400,3 +400,7 @@ Currently installed/configured:
   after deployment; PokeNordic's prior 429/backoff remains. No new errors/pushes.
   SQLite integrity/FK checks passed; all 489 products, 344 notification records and
   32 baseline timestamps preserved. Notifications identical to phase preflight.
+- At 19:07:43 UTC the unchanged monitor sent two ordinary Cardero events (restock
+  and new product); price commands sent none. Current rows 490 products / 346
+  notifications. RIP & SHIP titles correctly excluded by the new price matcher.
+  Initial app audit is timestamped 19:01:43; later delta is in the server record.
